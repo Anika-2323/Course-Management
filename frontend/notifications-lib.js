@@ -1,17 +1,16 @@
 /* ============================================================
-   VeritasNotify — shared client-side notification utility
+   SkillTrackNotify — shared client-side notification utility
    ------------------------------------------------------------
    Frontend-only stand-in for a real notification/email service.
    Every "email" here is a locally stored preview object; nothing
    is actually sent. Once a backend exists, swap the inside of
-   buildEmailPreview()/push() for real API calls — every page that
-   calls VeritasNotify.push(...) keeps working unchanged.
+   buildEmailPreview()/push() for real API calls.
 
    Include this file BEFORE your page's own <script> with:
      <script src="notifications-lib.js"></script>
    ============================================================ */
 (function (global) {
-  const STORAGE_PREFIX = "veritasNotifications_";
+  const STORAGE_PREFIX = "skilltrackNotifications_";
 
   function getStudentId() {
     return localStorage.getItem("studentAcademicId") || "default";
@@ -90,7 +89,7 @@
     const list = getAll();
 
     if (opts.dedupeKey && list.some(n => n.dedupeKey === opts.dedupeKey)) {
-      return null; // already sent this exact notification before
+      return null;
     }
 
     const notification = {
@@ -110,7 +109,7 @@
     saveAll(list);
 
     if (typeof global.dispatchEvent === "function") {
-      global.dispatchEvent(new CustomEvent("veritas-notification", { detail: notification }));
+      global.dispatchEvent(new CustomEvent("skilltrack-notification", { detail: notification }));
     }
     return notification;
   }
@@ -138,7 +137,7 @@
     return getAll().filter(n => !n.read).length;
   }
 
-  global.VeritasNotify = {
+  global.SkillTrackNotify = {
     TYPE_META,
     push,
     getAll,

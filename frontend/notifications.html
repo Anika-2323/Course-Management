@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notifications — SkillTrack</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght=0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght=400;500;600;700&display=swap');
 
   :root {
     --ink: #10192B;
@@ -42,7 +42,7 @@
   .btn { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: var(--radius); font-weight: 600; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; text-decoration: none; font-family: var(--body); }
   .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
   .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
-  .btn-quiet { background: transparent; border: none; color: var(--ink); opacity: 0.6; font-weight: 600; font-size: 0.8rem; padding: 6px 4px; }
+  .btn-quiet { background: transparent; border: none; color: var(--ink); opacity: 0.6; font-weight: 600; font-size: 0.8rem; padding: 6px 4px; cursor: pointer; }
   .btn-quiet:hover { opacity: 1; }
 
   main.page { margin: 50px 0 90px; }
@@ -89,7 +89,6 @@
   .empty-state h3 { font-family: var(--display); font-weight: 500; color: var(--ink); margin: 0 0 8px 0; font-size: 1.3rem; }
   .empty-state p { opacity: 0.65; font-size: 0.92rem; max-width: 40ch; margin: 0 auto; }
 
-  /* Email preview modal — styled as a minimal envelope window */
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(16,25,43,0.45);
     align-items: center; justify-content: center; z-index: 100; padding: 24px;
@@ -124,7 +123,7 @@
 
   <header class="site-header">
     <div class="wrap">
-      <a href="courses.html" class="brand">SkillTrack Portal</a>
+      <a href="student-dashboard.html" class="brand">SkillTrack Portal</a>
       <nav class="header-nav">
         <a href="student-dashboard.html">My Dashboard</a>
         <a href="notifications.html" class="current">Notifications</a>
@@ -205,7 +204,7 @@
     }
 
     function renderFilterTabs() {
-      const all = VeritasNotify.getAll();
+      const all = SkillTrackNotify.getAll();
       const root = document.getElementById('filter-tabs');
       root.innerHTML = "";
 
@@ -227,7 +226,7 @@
     }
 
     function renderNotifications() {
-      const all = VeritasNotify.getAll();
+      const all = SkillTrackNotify.getAll();
       const filtered = activeFilter === "all" ? all : all.filter(n => n.type === activeFilter);
       const listRoot = document.getElementById('notif-list');
       listRoot.innerHTML = "";
@@ -244,7 +243,7 @@
       }
 
       filtered.forEach(n => {
-        const meta = VeritasNotify.TYPE_META[n.type] || { label: n.title, icon: "🔔" };
+        const meta = SkillTrackNotify.TYPE_META[n.type] || { label: n.title, icon: "🔔" };
         listRoot.insertAdjacentHTML('beforeend', `
           <div class="notif-card ${n.read ? '' : 'unread'}" data-id="${n.id}">
             <div class="notif-icon">${meta.icon}</div>
@@ -258,7 +257,7 @@
                 <button class="notif-link" onclick="openEmailPreview('${n.id}')">View email preview</button>
                 ${!n.read ? `<button class="btn-quiet" onclick="markOneRead('${n.id}')">Mark as read</button>` : ''}
                 ${n.type === 'certificate' && n.courseId ? `<a class="notif-link" href="certificate.html?id=${n.courseId}">View certificate</a>` : ''}
-                ${n.type === 'assignment_reminder' && n.courseId ? `<a class="notif-link" href="classroom.html?id=${n.courseId}">Resume course</a>` : ''}
+                ${n.type === 'assignment_reminder' && n.courseId ? `<a class="notif-link" href="course-content.html?id=${n.courseId}">Resume course</a>` : ''}
               </div>
             </div>
           </div>
@@ -267,21 +266,21 @@
     }
 
     function markOneRead(id) {
-      VeritasNotify.markRead(id);
+      SkillTrackNotify.markRead(id);
       renderFilterTabs();
       renderNotifications();
     }
 
     function markAllAsRead() {
-      VeritasNotify.markAllRead();
+      SkillTrackNotify.markAllRead();
       renderFilterTabs();
       renderNotifications();
     }
 
     function openEmailPreview(id) {
-      const notif = VeritasNotify.getAll().find(n => n.id === id);
+      const notif = SkillTrackNotify.getAll().find(n => n.id === id);
       if (!notif) return;
-      if (!notif.read) VeritasNotify.markRead(id);
+      if (!notif.read) SkillTrackNotify.markRead(id);
 
       document.getElementById('email-to').innerText = notif.email.to;
       document.getElementById('email-subject').innerText = notif.email.subject;
@@ -296,21 +295,20 @@
       document.getElementById('email-modal-overlay').classList.remove('open');
     }
 
-    // --- Demo helpers: simulate the four notification types without a backend ---
     function simulate(type) {
-      const sampleCourse = { courseId: "CS-101", courseTitle: "Foundations of Programming" };
+      const sampleCourse = { courseId: "CS-403", courseTitle: "Agentic AI Systems & Autonomous Frameworks" };
       switch (type) {
         case "new_course":
-          VeritasNotify.push("new_course", { courseId: "CS-501", courseTitle: "Applied Machine Learning" });
+          SkillTrackNotify.push("new_course", { courseId: "CS-501", courseTitle: "Applied Machine Learning" });
           break;
         case "enrollment":
-          VeritasNotify.push("enrollment", sampleCourse);
+          SkillTrackNotify.push("enrollment", sampleCourse);
           break;
         case "assignment_reminder":
-          VeritasNotify.push("assignment_reminder", sampleCourse);
+          SkillTrackNotify.push("assignment_reminder", sampleCourse);
           break;
         case "certificate":
-          VeritasNotify.push("certificate", sampleCourse);
+          SkillTrackNotify.push("certificate", sampleCourse);
           break;
       }
       renderFilterTabs();
