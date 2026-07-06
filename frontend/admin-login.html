@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administrator Login — SkillTrack</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+  <aside class="auth-side admin-side">
+    <a href="index.html" class="brand">
+      <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+      <span>
+        <span class="brand-name">SkillTrack</span>
+        <span class="brand-sub">Course &amp; Progress System</span>
+      </span>
+    </a>
+
+    <div class="auth-side-copy">
+      <p class="section-eyebrow">Administrator access</p>
+      <h2>The full record, under your custody.</h2>
+      <p>Manage courses, oversee enrollments, and review completion reports for every student on the platform.</p>
+    </div>
+
+    <a class="auth-side-back" href="role.html">&larr; Choose a different role</a>
+
+    <svg class="auth-side-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="21"></circle>
+      <circle cx="24" cy="24" r="16"></circle>
+      <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+    </svg>
+  </aside>
+
+  <section class="auth-form-col">
+    <div class="auth-form-inner">
+      <p class="section-eyebrow" style="color:var(--burgundy);">Administrator</p>
+      <h1>Secure login</h1>
+      <p>This area is restricted to authorized administrators only.</p>
+
+      <!-- Notice box styled to display error or success messages -->
+      <div class="notice" id="login-notice"></div>
+
+      <form id="admin-login-form">
+        <div class="field">
+          <label for="admin-email">Admin email</label>
+          <input id="admin-email" name="email" type="email" placeholder="admin@institute.edu" required>
+        </div>
+
+        <div class="field">
+          <label for="admin-password">Password</label>
+          <input id="admin-password" name="password" type="password" placeholder="Your password" required>
+        </div>
+
+        <div class="field-aux">
+          <a href="#" style="color:var(--burgundy);">Forgot password?</a>
+        </div>
+
+        <button class="btn btn-burgundy btn-block" type="submit">Login securely</button>
+      </form>
+
+      <p class="form-foot">Administrator accounts are issued by SkillTrack, not self-registered.</p>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/script.js"></script>
+<script>
+  document.getElementById('admin-login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Stop page from submitting normally
+
+    const email = document.getElementById('admin-email').value;
+    const password = document.getElementById('admin-password').value;
+    const notice = document.getElementById('login-notice');
+
+    // Perform validation check against required mock credentials
+    if (email === "admin@institute.edu" && password === "password") {
+      // Add this inside the successful admin authentication block inside admin-login.html
+      localStorage.removeItem("isStudentLoggedIn");
+      localStorage.removeItem("studentName");
+
+      // 1. Save login state across the workspace ecosystem
+      localStorage.setItem("isAdminVerified", "true");
+
+      // 2. Display success layout parameters
+      notice.className = "notice show success";
+      notice.innerText = "Login successful — redirecting to the administrative registry.";
+
+      // 3. Smooth redirect back to courses system panel after a split second
+      setTimeout(function() {
+        window.location.href = "courses.html";
+      }, 1000);
+      
+    } else {
+      // Display alert block when credential properties misalign
+      notice.className = "notice show error";
+      notice.innerText = "Access Denied: Invalid password.";
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillTrack — Courses</title>
+  <style>
+    /* ============================================================
+       Student Course Management — Design Tokens
+       Palette : Ink #10192B · Parchment #F7F2E7 · Gold #B8893E
+                 Burgundy (admin accent) #6E2A36 · Charcoal #2A2620
+       Type    : "Fraunces" (display) · "Inter" (body/UI)
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --parchment-dim: #EFE7D6;
+      --gold: #B8893E;
+      --gold-soft: #D9B97C;
+      --burgundy: #6E2A36;
+      --burgundy-soft: #8C3F4C;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --line-light: rgba(247,242,231,0.18);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ---------- Crest signature mark ---------- */
+    .crest {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+    .crest path, .crest circle, .crest line {
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.1;
+    }
+    .crest .crest-fill { fill: currentColor; stroke: none; }
+
+    /* ---------- Top navigation ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,242,231,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 84px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--ink);
+    }
+    .brand .crest { color: var(--gold); }
+    .brand-name {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1.3rem;
+      letter-spacing: 0.01em;
+    }
+    .brand-sub {
+      display: block;
+      font-family: var(--body);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      opacity: 0.55;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-links .nav-item {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--ink);
+      opacity: 0.75;
+      transition: opacity 0.2s ease;
+    }
+    .nav-links .nav-item:hover { opacity: 1; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.01em;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--ink); color: var(--parchment); }
+    .btn-primary:hover { background: var(--ink-soft); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+    .btn-burgundy { background: var(--burgundy); color: var(--parchment); }
+    .btn-burgundy:hover { background: var(--burgundy-soft); }
+
+    /* ---------- Course Page Elements ---------- */
+    .catalog-hero {
+      padding: 80px 0 40px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 60px;
+    }
+    .catalog-title {
+      font-family: var(--display);
+      font-size: 3rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin: 0 0 10px 0;
+    }
+    .catalog-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.7;
+      margin: 0;
+      max-width: 60ch;
+    }
+
+    .admin-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--ink);
+      color: var(--parchment);
+      padding: 16px 24px;
+      margin-bottom: 40px;
+      border-radius: var(--radius);
+    }
+    .admin-bar-info p { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+    .admin-bar-info h4 { margin: 0; font-family: var(--display); color: var(--gold-soft); font-size: 1.1rem; font-weight: 500; }
+
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 40px;
+      margin-bottom: 80px;
+    }
+    
+    .course-card {
+      background: rgba(255, 255, 255, 0.35);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .course-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+    }
+
+    .course-meta {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .course-card h3 {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      font-weight: 500;
+      margin: 0 0 14px 0;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .course-desc {
+      font-size: 0.95rem;
+      opacity: 0.75;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+
+    .course-details-row {
+      display: flex;
+      gap: 20px;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      margin-bottom: 24px;
+      opacity: 0.7;
+    }
+
+    .course-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .course-actions .btn { flex: 1; padding: 10px 16px; font-size: 0.82rem; }
+
+    /* ---------- Modal Context Overlays ---------- */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(16, 25, 43, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-content {
+      background: var(--parchment);
+      border: 1px solid var(--ink);
+      max-width: 460px;
+      width: 90%;
+      padding: 40px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .modal h3 { font-family: var(--display); font-size: 1.8rem; margin: 0 0 10px 0; color: var(--ink); }
+    .modal p { font-size: 0.92rem; opacity: 0.75; margin: 0 0 24px 0; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 4px;
+      font-family: var(--body);
+      font-size: 0.95rem;
+    }
+    .form-group input:focus { outline: none; border-bottom-color: var(--gold); }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; }
+    .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
+
+    @media (max-width: 768px) {
+      .course-grid { grid-template-columns: 1fr; }
+      .site-header .wrap { height: auto; padding: 20px; flex-direction: column; gap: 16px; }
+      .nav-links { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Top Navigation -->
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand">
+        <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+        <div>
+          <span class="brand-name">SkillTrack </span>
+          <span class="brand-sub">Curriculum & Learning</span>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-item">Home</a>
+        <a href="courses.html" class="nav-item" style="opacity: 1; font-weight:600;">Courses</a>
+        
+        <!-- Dynamic Portal Interface Container Elements -->
+        <div id="nav-actions-wrapper" style="display: flex; align-items: center; gap: 12px;">
+          <a href="role.html" class="btn btn-ghost" id="nav-auth-btn">Portal Login</a>
+          <!-- Pointing to the self-contained session wiper -->
+          <button onclick="handleGlobalSessionLogout()" class="btn btn-ghost" id="nav-logout-btn" style="display: none; opacity: 0.7;">Sign Out</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Core Content Container -->
+  <main class="wrap section">
+    
+    <div class="catalog-hero">
+      <div class="section-eyebrow">Academic Catalog</div>
+      <h1 class="catalog-title">Available Courses</h1>
+      <p class="catalog-subtitle">Select architectures engineered for advanced technological design, technical optimization, and high-performance framework design.</p>
+    </div>
+
+    <!-- Administrative Quick-Action Controller Strip -->
+    <!-- Administrative Quick-Action Controller Strip -->
+    <div class="admin-bar" id="admin-bar" style="display: none;">
+      <div class="admin-bar-info">
+        <h4>Administrative Operations Active</h4>
+        <p>System credentials verified. Authorization clear for direct schema modification.</p>
+      </div>
+      <div>
+        <a href="add-course.html" class="btn btn-burgundy">Add New Course</a>
+        <!-- Point this to handleGlobalSessionLogout directly -->
+        <button onclick="handleGlobalSessionLogout()" class="btn btn-ghost" style="color:var(--parchment); border-color:var(--parchment); padding: 10px 16px; margin-left: 10px;">Log Out Admin</button>
+      </div>
+    </div>
+
+    <!-- Courses Grid Matrix -->
+    <div class="course-grid">
+      
+      <!-- Course 1 -->
+      <div class="course-card" data-course-id="CS-101">
+        <div>
+          <div class="course-meta">Module 01 • Advanced Automation</div>
+          <h3>Python and Java Architecture Systems</h3>
+          <p class="course-desc">A deep dive study focused on systemic structural testing, enterprise architectural design implementation, and optimization patterns.</p>
+          <div class="course-details-row">
+            <span><strong>Duration:</strong> 8 Weeks</span>
+            <span><strong>Track:</strong> Advanced</span>
+          </div>
+        </div>
+        <div class="course-actions">
+          <button class="btn btn-primary" onclick="handleEnrollment('CS-101', 'Python and Java Architecture Systems')">Enroll</button>
+          <button class="btn btn-ghost" onclick="handleAdminEdit('CS-101')">Edit Schema</button>
+        </div>
+      </div>
+
+      <!-- Course 2 -->
+      <div class="course-card" data-course-id="CS-204">
+        <div>
+          <div class="course-meta">Module 02 • Artificial Intelligence</div>
+          <h3>Computer Vision Systems</h3>
+          <p class="course-desc">Real-time object mapping arrays, spatial processing architecture, and pixel structural identification methods inside 30-second cycles.</p>
+          <div class="course-details-row">
+            <span><strong>Duration:</strong> 10 Weeks</span>
+            <span><strong>Track:</strong> Specialized</span>
+          </div>
+        </div>
+        <div class="course-actions">
+          <button class="btn btn-primary" onclick="handleEnrollment('CS-204', 'Computer Vision Systems')">Enroll</button>
+          <button class="btn btn-ghost" onclick="handleAdminEdit('CS-204')">Edit Schema</button>
+        </div>
+      </div>
+
+      <!-- Course 3 -->
+      <div class="course-card" data-course-id="CS-309">
+        <div>
+          <div class="course-meta">Module 03 • Robotics & Hardware</div>
+          <h3>Autonomous Line Follower Design</h3>
+          <p class="course-desc">Hardware integration covering ultrasonic structural sensor calculation arrays, operational driver modules, and autonomous motion control.</p>
+          <div class="course-details-row">
+            <span><strong>Duration:</strong> 6 Weeks</span>
+            <span><strong>Track:</strong> Labs</span>
+          </div>
+        </div>
+        <div class="course-actions">
+          <button class="btn btn-primary" onclick="handleEnrollment('CS-309', 'Autonomous Line Follower Design')">Enroll</button>
+          <button class="btn btn-ghost" onclick="handleAdminEdit('CS-309')">Edit Schema</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Context Overlays (Student Detail Collection Form Modal) -->
+  <div class="modal" id="enrollment-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('enrollment-modal')">&times;</button>
+      <div class="section-eyebrow" id="enroll-modal-meta">Verification Required</div>
+      <h3 id="enroll-modal-title">Complete Enrollment</h3>
+      <p>Confirm your academic profile identity to map this module allocation to your transcript.</p>
+      
+      <form id="enrollment-form" onsubmit="executeEnrollment(event)">
+        <input type="hidden" id="enroll-course-id">
+        <div class="form-group">
+          <label for="student-fullname">Full Name</label>
+          <input type="text" id="student-fullname" required placeholder="Alex">
+        </div>
+        <div class="form-group">
+          <label for="student-academic-id">Roll no.</label>
+          <input type="text" id="student-academic-id" required placeholder="XXXXXX">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('enrollment-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Context Overlays (Administrative Authorization Access Gate) -->
+  <div class="modal" id="admin-gate-modal">
+    <div class="modal-content" style="border-color: var(--burgundy);">
+      <button class="modal-close" onclick="closeModal('admin-gate-modal')">&times;</button>
+      <div class="section-eyebrow" style="color: var(--burgundy);">Security Protocol</div>
+      <h3>Admin Credentials</h3>
+      <p>Modifying core blueprints requires immediate administrative clearance authentication.</p>
+      
+      <form id="admin-gate-form" onsubmit="verifyAdminClearance(event)">
+        <input type="hidden" id="edit-target-course-id">
+        <div class="form-group">
+          <label for="admin-email">Admin Email Address</label>
+          <input type="email" id="admin-email" required placeholder="admin@institute.edu">
+        </div>
+        <div class="form-group">
+          <label for="admin-pass">Password</label>
+          <input type="password" id="admin-pass" required placeholder="••••••••">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('admin-gate-modal')">Cancel</button>
+          <button type="submit" class="btn btn-burgundy">Verify Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <span>SkillTrack </span>
+      </div>
+      <div class="footer-note">© 2026 SkillTrack . All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Application Interaction Logic Script -->
+  <script>
+    // 1. Initial Mock Database Definition (Keep your existing array here)
+    const defaultCourses = [
+      {
+        id: "CS-101",
+        meta: "Module 01 • Advanced Automation",
+        title: "Python and Java Architecture Systems",
+        desc: "A deep dive study focused on systemic structural testing, enterprise architectural design implementation, and optimization patterns.",
+        duration: "8 Weeks",
+        track: "Advanced"
+      },
+      {
+        id: "CS-204",
+        meta: "Module 02 • Artificial Intelligence",
+        title: "Computer Vision Systems",
+        desc: "Real-time object mapping arrays, spatial processing architecture, and pixel structural identification methods inside 30-second cycles.",
+        duration: "10 Weeks",
+        track: "Specialized"
+      },
+      {
+        id: "CS-309",
+        meta: "Module 03 • Robotics & Hardware",
+        title: "Autonomous Line Follower Design",
+        desc: "Hardware integration covering ultrasonic structural sensor calculation arrays, operational driver modules, and autonomous motion control.",
+        duration: "6 Weeks",
+        track: "Labs"
+      }
+    ];
+    
+    if (!localStorage.getItem("globalCourses")) {
+      localStorage.setItem("globalCourses", JSON.stringify(defaultCourses));
+    }
+
+    // ============================================================
+    // FIXED SESSION STATE INITIALIZER
+    // Now reads BOTH student and admin statuses directly from memory!
+    // ============================================================
+    let sessionState = {
+      isStudentLoggedIn: localStorage.getItem("isStudentLoggedIn") === "true", 
+      isAdminVerified: localStorage.getItem("isAdminVerified") === "true"
+    };
+
+    // Run layout calculations on initialization
+    document.addEventListener("DOMContentLoaded", function() {
+      evaluateSessionInterfaceUpdate();
+      renderCoursesFromStorage();
+    });
+
+    // --- REDIRECT TO THE SCHEMA EDITING PORTAL ---
+    function handleAdminEdit(courseId) {
+      // Sends the user to edit-course.html with the right ID (e.g., edit-course.html?id=CS-309)
+      window.location.href = `edit-course.html?id=${courseId}`;
+    }
+
+    function evaluateSessionInterfaceUpdate() {
+      const adminStrip = document.getElementById('admin-bar');
+      const authBtn = document.getElementById('nav-auth-btn');
+      const logoutBtn = document.getElementById('nav-logout-btn');
+
+      if (sessionState.isAdminVerified) {
+        adminStrip.style.display = 'flex';
+        authBtn.innerText = "Admin Dashboard";
+        authBtn.href = "admin-dashboard.html";
+        authBtn.className = "btn btn-burgundy";
+        
+        // Show Sign Out button next to it
+        logoutBtn.style.display = 'inline-flex';
+      } else if (sessionState.isStudentLoggedIn) {
+        adminStrip.style.display = 'none';
+        authBtn.innerText = "My Dashboard";
+        authBtn.href = "student-dashboard.html";
+        authBtn.className = "btn btn-primary";
+        
+        // Show Sign Out button next to it
+        logoutBtn.style.display = 'inline-flex';
+      } else {
+        adminStrip.style.display = 'none';
+        authBtn.innerText = "Portal Login";
+        authBtn.href = "role.html";
+        authBtn.className = "btn btn-ghost";
+        
+        // Hide Sign Out button if no user is authenticated
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    // New clear-state function to remove all active profile session cookies
+    // Clear-state function to remove active profile session tokens and redirect home
+    function handleGlobalSessionLogout() {
+      // 1. Clear out every potential storage token systematically
+      localStorage.removeItem("isStudentLoggedIn");
+      localStorage.removeItem("studentName");
+      localStorage.removeItem("studentAcademicId");
+      localStorage.removeItem("isAdminVerified");
+      
+      // 2. Safety wrapper reset logic for runtime properties
+      if (typeof sessionState !== 'undefined') {
+        sessionState.isStudentLoggedIn = false;
+        sessionState.isAdminVerified = false;
+      }
+      
+      alert("Session closed safely.");
+      
+      // 3. Clear window navigation states and steer back home
+      window.location.href = "index.html";
+    }
+
+    // 3. DYNAMIC RENDER ENGINE BLOCK
+    function renderCoursesFromStorage() {
+      const courses = JSON.parse(localStorage.getItem("globalCourses"));
+      const grid = document.querySelector('.course-grid');
+      grid.innerHTML = ""; // Clear existing static cards
+
+      courses.forEach(course => {
+        const cardHTML = `
+          <div class="course-card" data-course-id="${course.id}">
+            <div>
+              <div class="course-meta">${course.meta}</div>
+              <h3>${course.title}</h3>
+              <p class="course-desc">${course.desc}</p>
+              <div class="course-details-row">
+                <span><strong>Duration:</strong> ${course.duration}</span>
+                <span><strong>Track:</strong> ${course.track}</span>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button class="btn btn-primary" onclick="handleEnrollment('${course.id}', '${course.title.replace(/'/g, "\\'")}')">Enroll</button>
+              <button class="btn btn-ghost" onclick="handleAdminEdit('${course.id}')">Edit Schema</button>
+            </div>
+          </div>
+        `;
+        grid.insertAdjacentHTML('beforeend', cardHTML);
+      });
+    }
+
+    // --- STUDENT ENROLLMENT LOGIC TRAIN (FIXED) ---
+    // --- FIXED ENROLLMENT LOGIC TRAIN FOR MULTI-STUDENT TRACKING ---
+    function handleEnrollment(courseId, courseTitle) {
+      const isStudentRegistered = localStorage.getItem("isStudentLoggedIn") === "true";
+
+      if (!isStudentRegistered) {
+        alert("Authentication context absent. Redirecting to student login system.");
+        window.location.href = "student-login.html";
+        return;
+      }
+
+      // Read who is logged in right now
+      const currentStudentId = localStorage.getItem("studentAcademicId") || "E24AI003";
+      const savedName = localStorage.getItem("studentName") || "Anika";
+
+      // Hydrate inputs inside your enrollment detail modal overlay
+      document.getElementById('enroll-course-id').value = courseId;
+      document.getElementById('enroll-modal-meta').innerText = `Target Allocation: ${courseId}`;
+      document.getElementById('enroll-modal-title').innerText = courseTitle;
+      
+      // Auto-populate the specific student profiles parameters cleanly
+      document.getElementById('student-fullname').value = savedName;
+      document.getElementById('student-academic-id').value = currentStudentId;
+
+      openModal('enrollment-modal');
+    }
+
+    function executeEnrollment(event) {
+      event.preventDefault();
+      
+      const courseId = document.getElementById('enroll-course-id').value;
+      
+      // 1. Read the EXACT Roll Number the student typed or verified in the form field
+      const studentId = document.getElementById('student-academic-id').value.trim(); 
+      
+      console.log(`Writing metrics to ledger for student: ${studentId} into course: ${courseId}`);
+      
+      // 2. ALWAYS save the enrollment key under this specific roll number!
+      let records = JSON.parse(localStorage.getItem(`enrolledTracks_${studentId}`)) || [];
+      
+      // Prevent duplicate enrollment allocations for the exact same course module entry
+      if (!records.some(r => r.courseId === courseId)) {
+        records.push({ courseId: courseId, student: studentId });
+        localStorage.setItem(`enrolledTracks_${studentId}`, JSON.stringify(records));
+      }
+
+      // 3. Keep the browser session updated with this student's chosen Roll Number
+      localStorage.setItem("studentAcademicId", studentId);
+
+      closeModal('enrollment-modal');
+      
+      // Forward to success layout route
+      window.location.href = "enrollment-success.html";
+    }
+
+    function verifyAdminClearance(event) {
+      event.preventDefault();
+      const email = document.getElementById('admin-email').value;
+      const pass = document.getElementById('admin-pass').value;
+      const targetCourse = document.getElementById('edit-target-course-id').value;
+
+      if (email === "admin@institute.edu" && pass === "password") {
+        localStorage.setItem("isAdminVerified", "true");
+        sessionState.isAdminVerified = true;
+        closeModal('admin-gate-modal');
+        evaluateSessionInterfaceUpdate();
+        window.location.href = `edit-course.html?id=${targetCourse}`;
+      } else {
+        alert("Invalid Security Password. Elevated access structure rejected.");
+      }
+    }
+
+
+    function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+  </script>
+</body>
+</html>

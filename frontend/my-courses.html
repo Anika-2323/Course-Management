@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillTrack — My Enrolled Modules</title>
+  <style>
+    /* ============================================================
+       Academic Workspace Architecture — Design Tokens
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --parchment-dim: #EFE7D6;
+      --gold: #B8893E;
+      --gold-soft: #D9B97C;
+      --burgundy: #6E2A36;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 32px;
+      width: 100%;
+    }
+
+    /* ---------- Site Header ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,242,231,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+    .brand { display: flex; align-items: center; gap: 14px; color: var(--ink); }
+    .brand-name { font-family: var(--display); font-weight: 600; font-size: 1.3rem; }
+    .brand-sub { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; }
+
+    /* ---------- Workspace Layout ---------- */
+    .workspace-container { margin: 50px 0 90px 0; }
+    .workspace-header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .workspace-title { font-family: var(--display); font-size: 2.2rem; font-weight: 500; color: var(--ink); margin: 0 0 6px 0; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 12px 22px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-primary:hover { background: var(--ink-soft); }
+
+    /* ---------- Modules Grid ---------- */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 30px;
+    }
+    .course-card {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 240px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .course-card:hover { border-color: var(--ink); background: rgba(255, 255, 255, 0.8); }
+
+    /* ---------- Progress Bar Elements ---------- */
+    .progress-track { background: rgba(16,25,43,0.08); height: 4px; border-radius: 10px; margin: 18px 0 8px 0; overflow: hidden; position: relative; }
+    .progress-fill { background: var(--gold); height: 100%; width: 0%; transition: width 0.4s ease; }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); padding: 40px 0; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <div>
+          <span class="brand-name">SkillTrack</span>
+          <span class="brand-sub">Student Academic Ledger</span>
+        </div>
+      </div>
+      <a href="student-dashboard.html" class="btn btn-ghost" style="padding: 10px 20px; font-size: 0.8rem;">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="workspace-container">
+      <div class="workspace-header">
+        <div>
+          <h1 class="workspace-title">My Academic Modules</h1>
+          <p style="margin: 0; opacity: 0.65; font-size: 0.95rem;">Review textbook content paths, monitor section completions, and continue your active study paths.</p>
+        </div>
+        <span id="workspace-counter-pill" style="font-size: 0.82rem; font-weight: 700; background: rgba(16,25,43,0.06); padding: 6px 14px; border-radius: 30px; text-transform: uppercase; letter-spacing: 0.05em;">0 Active Modules</span>
+      </div>
+
+      <!-- MASTER INJECTION PORTAL GRID -->
+      <div id="workspace-modules-container" class="modules-grid">
+        <!-- Enrolled course matrices render dynamically inside here -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; opacity: 0.5;">
+      <span>SkillTrack Learning Environment</span>
+      <span>© 2026 Academic Catalog Matrix.</span>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      hydrateFullWorkspaceCatalog();
+    });
+
+    function hydrateFullWorkspaceCatalog() {
+      const currentStudentId = localStorage.getItem("studentAcademicId") || "default";
+      const rawEnrolledTracks = JSON.parse(localStorage.getItem(`enrolledTracks_${currentStudentId}`)) || [];
+      const allProgressStats = JSON.parse(localStorage.getItem("studentProgressStats")) || {};
+      const globalCourses = JSON.parse(localStorage.getItem("globalCourses")) || [];
+      
+      const progressStats = allProgressStats[currentStudentId] || {};
+
+      // 🔥 FILTER OUT GHOST DELETED COURSES AUTOMATICALLY
+      const enrolledTracks = rawEnrolledTracks.filter(track => {
+        return globalCourses.some(c => c.id === track.courseId);
+      });
+
+      // Update counter pill state text metric
+      document.getElementById('workspace-counter-pill').innerText = `${enrolledTracks.length} Active Modules`;
+
+      const container = document.getElementById('workspace-modules-container');
+      if (!container) return;
+      
+      container.innerHTML = "";
+
+      if (enrolledTracks.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; border: 1px dashed var(--line); background: rgba(255,255,255,0.2);">
+            <p style="opacity: 0.6; margin: 0 0 16px 0;">You are not currently registered in any active learning course handbooks.</p>
+            <a href="catalog.html" class="btn btn-primary" style="font-size: 0.8rem;">Browse Course Catalog</a>
+          </div>
+        `;
+        return;
+      }
+
+      enrolledTracks.forEach(track => {
+        const courseInfo = globalCourses.find(c => c.id === track.courseId) || { 
+          title: track.courseId, 
+          track: "General",
+          desc: "Course manual syllabus description missing."
+        };
+        
+        const currentPercent = progressStats[track.courseId] || 0;
+
+        // Dynamic status button engine configurations
+        // Locate where buttonText is configured inside your card rendering loop:
+        let buttonText = "Start Module";
+        if (currentPercent > 0 && currentPercent < 100) buttonText = "Resume Study";
+
+        let actionButtonHTML = `
+          <a href="course-content.html?id=${track.courseId}" class="btn btn-primary" style="width: 100%;">
+            ${buttonText} →
+          </a>
+        `;
+
+        // 🔥 THE REWARD SWAP: If progress is 100%, show a link to your new certificate page!
+        if (currentPercent === 100) {
+          actionButtonHTML = `
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="course-content.html?id=${track.courseId}" class="btn btn-ghost" style="width: 100%; border-color: var(--line);">
+                Review Handbook
+              </a>
+              <a href="certificate.html?id=${track.courseId}" class="btn" style="width: 100%; background: #D4AF37; color: #10192B; border: none; font-weight: 700;">
+                🎓 Claim Certificate
+              </a>
+            </div>
+          `;
+        }
+
+        const courseCardHTML = `
+          <div class="course-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.68rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em;">${courseInfo.track}</span>
+                <strong style="font-size: 0.85rem; opacity: 0.6; font-family: var(--body);">${track.courseId}</strong>
+              </div>
+              <h3 style="font-family: var(--display); font-size: 1.35rem; margin: 0 0 10px 0; color: var(--ink); font-weight: 500; line-height: 1.3;">${courseInfo.title}</h3>
+              <p style="font-size: 0.88rem; opacity: 0.7; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${courseInfo.desc}</p>
+            </div>
+            
+            <div style="margin-top: 24px;">
+              <div class="progress-track">
+                <div class="progress-fill" style="width: ${currentPercent}%;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <span style="font-size: 0.78rem; font-weight: 600; opacity: 0.5;">Syllabus Status</span>
+                <span style="font-size: 0.78rem; font-weight: 700; color: var(--ink);">${currentPercent}% Done</span>
+              </div>
+              
+              <!-- 🔥 FIXED HERE: Swapping in your dynamic certificate/action buttons layout -->
+              ${actionButtonHTML}
+              
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', courseCardHTML);
+      });
+    }
+  </script>
+</body>
+</html>

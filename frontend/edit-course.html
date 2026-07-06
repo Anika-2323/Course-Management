@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Architecture — Edit Module Blueprint</title>
+  <style>
+    /* ============================================================
+       Student Course Management — Design Tokens (Maintained layout colors)
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --parchment-dim: #EFE7D6;
+      --gold: #B8893E;
+      --gold-soft: #D9B97C;
+      --burgundy: #6E2A36;
+      --burgundy-soft: #8C3F4C;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 32px; width: 100%; }
+
+    .crest { width: 40px; height: 40px; flex-shrink: 0; }
+    .crest path, .crest circle { stroke: currentColor; fill: none; stroke-width: 1.1; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,242,231,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+    .brand { display: flex; align-items: center; gap: 14px; color: var(--ink); }
+    .brand .crest { color: var(--burgundy); }
+    .brand-name { font-family: var(--display); font-weight: 600; font-size: 1.3rem; }
+    .brand-sub { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; }
+
+    .config-container { max-width: 680px; margin: 60px auto 90px; }
+    .config-header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 40px; }
+    .config-title { font-family: var(--display); font-size: 2.4rem; font-weight: 500; color: var(--ink); margin: 0 0 8px 0; }
+    .section-eyebrow { font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--burgundy); font-weight: 600; margin-bottom: 10px; }
+
+    .field-group { margin-bottom: 32px; }
+    .field-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field-group input, .field-group select, .field-group textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 4px;
+      font-family: var(--body);
+      font-size: 1rem;
+      color: var(--charcoal);
+    }
+    .field-group textarea { border: 1px solid var(--line); border-radius: var(--radius); resize: vertical; min-height: 120px; padding: 12px; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--burgundy); }
+    .field-group input[readonly] { opacity: 0.6; cursor: not-allowed; border-bottom-style: dashed; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-burgundy { background: var(--burgundy); color: var(--parchment); }
+    .btn-burgundy:hover { background: var(--burgundy-soft); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+
+    .form-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 32px; margin-top: 40px; }
+    .action-right { display: flex; gap: 16px; }
+    
+    .btn-danger-text { background: transparent; color: var(--burgundy); font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-danger-text:hover { text-decoration: underline; }
+
+    .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; }
+    .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; }
+    .footer-note { font-size: 0.8rem; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+        <div>
+          <span class="brand-name">SkillTrack</span>
+          <span class="brand-sub">Administrative Panel</span>
+        </div>
+      </div>
+      <a href="courses.html" class="btn btn-ghost" style="padding: 10px 20px; font-size: 0.8rem;">Return to Courses</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="config-container">
+      <div class="config-header">
+        <div class="section-eyebrow" id="edit-eyebrow">Target Registry Allocation</div>
+        <h1 class="config-title" id="edit-title">Modify Module Schema</h1>
+        <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Alter technical operational fields, core descriptions, or metrics within this data blueprint asset mapping.</p>
+      </div>
+
+      <form id="edit-course-form" onsubmit="updateCourseData(event)">
+        <div class="field-row">
+          <div class="field-group">
+            <label for="edit-course-id">Module Unique Code ID (Locked)</label>
+            <input type="text" id="edit-course-id" readonly>
+          </div>
+          <div class="field-group">
+            <label for="edit-course-meta">Catalog Track Meta Tag</label>
+            <input type="text" id="edit-course-meta" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="edit-course-title">Course Program Title</label>
+          <input type="text" id="edit-course-title" required>
+        </div>
+
+        <div class="field-group">
+          <label for="edit-course-desc">Structural Architecture Abstract Description</label>
+          <textarea id="edit-course-desc" required></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="edit-course-duration">Instructional Duration Scope</label>
+            <input type="text" id="edit-course-duration" required>
+          </div>
+          <div class="field-group">
+            <label for="edit-course-track">Complexity Classification Track</label>
+            <select id="edit-course-track" required>
+              <option value="Foundational">Foundational</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Specialized">Specialized</option>
+              <option value="Labs">Labs</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-danger-text" onclick="deleteCourseSchema()">Delete Module Schema</button>
+          <div class="action-right">
+            <a href="courses.html" class="btn btn-ghost">Cancel Changes</a>
+            <button type="submit" class="btn btn-burgundy">Apply Schema Updates</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack Authority System</span>
+      <div class="footer-note">© 2026 Direct Database Schema Protocol.</div>
+    </div>
+  </footer>
+
+  <script>
+    // --- IMMEDIATE SECURITY GUARD BLOCK ---
+    if (localStorage.getItem("isAdminVerified") !== "true") {
+      alert("Access Denied: Please log in first.");
+      window.location.href = "admin-login.html";
+    }
+
+    let currentCourses = JSON.parse(localStorage.getItem("globalCourses")) || [];
+    let activeCourseId = "";
+
+    // Load entry configuration fields from common storage matching URL tracking token ID
+    document.addEventListener("DOMContentLoaded", function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      activeCourseId = urlParams.get('id');
+      
+      const record = currentCourses.find(c => c.id === activeCourseId);
+      
+      if (record) {
+        document.getElementById('edit-eyebrow').innerText = `Target Blueprint Allocation: ${record.id}`;
+        document.getElementById('edit-course-id').value = record.id;
+        document.getElementById('edit-course-meta').value = record.meta;
+        document.getElementById('edit-course-title').value = record.title;
+        document.getElementById('edit-course-desc').value = record.desc;
+        document.getElementById('edit-course-duration').value = record.duration;
+        document.getElementById('edit-course-track').value = record.track;
+      } else {
+        alert("Target module identification out of scope index.");
+        window.location.href = "courses.html";
+      }
+    });
+
+    // Handle modification saving back down into common database array
+    function updateCourseData(event) {
+      event.preventDefault();
+      
+      const courseIndex = currentCourses.findIndex(c => c.id === activeCourseId);
+      
+      if (courseIndex !== -1) {
+        currentCourses[courseIndex] = {
+          id: activeCourseId,
+          meta: document.getElementById('edit-course-meta').value,
+          title: document.getElementById('edit-course-title').value,
+          desc: document.getElementById('edit-course-desc').value,
+          duration: document.getElementById('edit-course-duration').value,
+          track: document.getElementById('edit-course-track').value
+        };
+        
+        localStorage.setItem("globalCourses", JSON.stringify(currentCourses));
+        alert("System Success: Core blueprint structural alignment modified successfully.");
+        window.location.href = "courses.html";
+      }
+    }
+
+    // Handle module removal operations
+    function deleteCourseSchema() {
+      if (confirm(`Warning: You are initiating a full schema deletion process for code: ${activeCourseId}. Continue?`)) {
+        currentCourses = currentCourses.filter(c => c.id !== activeCourseId);
+        localStorage.setItem("globalCourses", JSON.stringify(currentCourses));
+        
+        alert(`Registry Update: Record blueprint schema entry ${activeCourseId} deprecated and scrubbed.`);
+        window.location.href = "courses.html";
+      }
+    }
+  </script>
+</body>
+</html>

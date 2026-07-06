@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Registration — SkillTrack</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+  <aside class="auth-side">
+    <a href="index.html" class="brand">
+      <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+      <span>
+        <span class="brand-name">SkillTrack</span>
+        <span class="brand-sub">Course &amp; Progress System</span>
+      </span>
+    </a>
+
+    <div class="auth-side-copy">
+      <p class="section-eyebrow">New student</p>
+      <h2>Your record starts the moment you register.</h2>
+      <p>One profile carries every course you enroll in, every module you complete, and every percentage point of progress.</p>
+    </div>
+
+    <a class="auth-side-back" href="role.html">&larr; Choose a different role</a>
+
+    <svg class="auth-side-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="21"></circle>
+      <circle cx="24" cy="24" r="16"></circle>
+      <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+    </svg>
+  </aside>
+
+  <section class="auth-form-col">
+    <div class="auth-form-inner">
+      <p class="section-eyebrow">Student</p>
+      <h1>Create your account</h1>
+      <p>It takes less than a minute. Your Student ID is generated automatically once you submit.</p>
+
+      <div class="notice"></div>
+
+      <form data-mock-submit data-success-message="Account created — your Student ID will be emailed shortly.">
+        <div class="field-row">
+          <div class="field">
+            <label for="reg-name">Full name</label>
+            <input id="reg-name" name="name" type="text" placeholder="e.g. Anjali Raghavan" required>
+          </div>
+          <div class="field">
+            <label for="reg-dept">Department</label>
+            <select id="reg-dept" name="department" data-placeholder-select required>
+              <option value="" disabled selected>Select department</option>
+              <option value="cse">Computer Science</option>
+              <option value="ece">Electronics &amp; Communication</option>
+              <option value="mech">Mechanical Engineering</option>
+              <option value="civil">Civil Engineering</option>
+              <option value="business">Business Administration</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="reg-email">Email address</label>
+          <input id="reg-email" name="email" type="email" placeholder="you@university.edu" required>
+        </div>
+
+        <div class="field">
+          <label for="reg-password">Password</label>
+          <input id="reg-password" name="password" type="password" placeholder="At least 8 characters" minlength="8" required>
+        </div>
+
+        <button class="btn btn-gold btn-block" type="submit">Register</button>
+      </form>
+
+      <div class="divider-or">Already enrolled</div>
+
+      <p class="form-foot">Have an account already? <a href="student-login.html">Login instead</a></p>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>

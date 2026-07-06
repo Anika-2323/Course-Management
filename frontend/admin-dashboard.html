@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Architecture — Admin Analytics</title>
+  <style>
+    /* ============================================================
+       Student Course Management — Design Tokens
+       Palette : Ink #10192B · Parchment #F7F2E7 · Gold #B8893E
+                 Burgundy (admin accent) #6E2A36 · Charcoal #2A2620
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --parchment-dim: #EFE7D6;
+      --gold: #B8893E;
+      --gold-soft: #D9B97C;
+      --burgundy: #6E2A36;
+      --burgundy-soft: #8C3F4C;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 32px; width: 100%; }
+
+    /* ---------- Crest ---------- */
+    .crest { width: 40px; height: 40px; flex-shrink: 0; }
+    .crest path, .crest circle { stroke: currentColor; fill: none; stroke-width: 1.1; }
+
+    /* ---------- Header ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,242,231,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+    .brand { display: flex; align-items: center; gap: 14px; color: var(--ink); }
+    .brand .crest { color: var(--burgundy); } 
+    .brand-name { font-family: var(--display); font-weight: 600; font-size: 1.3rem; }
+    .brand-sub { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; }
+
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-burgundy { background: var(--burgundy); color: var(--parchment); }
+    .btn-burgundy:hover { background: var(--burgundy-soft); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+
+    /* ---------- Dashboard Layout ---------- */
+    .db-header { margin: 50px 0 40px; }
+    .db-title { font-family: var(--display); font-size: 2.6rem; font-weight: 500; color: var(--ink); margin: 0 0 6px 0; }
+    .section-eyebrow { font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--burgundy); font-weight: 600; }
+
+    /* --- Summary Metrics Grid Grid --- */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-bottom: 80px;
+    }
+    
+    @media (max-width: 768px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    
+    .metric-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--burgundy);
+      padding: 32px;
+      border-radius: var(--radius);
+    }
+    .metric-label { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; }
+    .metric-value { font-family: var(--display); font-size: 3.5rem; font-weight: 600; color: var(--ink); line-height: 1.1; margin: 10px 0 4px; }
+    .metric-desc { font-size: 0.88rem; opacity: 0.7; margin: 0; }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; }
+    .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; }
+    .footer-note { font-size: 0.8rem; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+  <!-- Dashboard Navigation Header -->
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+        <div>
+          <span class="brand-name">SkillTrack</span>
+          <span class="brand-sub">Control Center</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="courses.html" class="btn btn-ghost">Go to Courses</a>
+        <button onclick="logoutAdmin()" class="btn btn-burgundy">Sign Out Session</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Workspace Shell -->
+  <main class="wrap">
+    
+    <div class="db-header">
+      <div class="section-eyebrow">Administrative Intelligence</div>
+      <h1 class="db-title">Institutional Overview</h1>
+      <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Command control interface layer for tracking performance metrics and catalog allocations.</p>
+    </div>
+
+    <!-- Analytics Dashboard Metrics Row -->
+    <section class="metrics-grid">
+      
+      <!-- Metric 1: Total Students -->
+      <div class="metric-card">
+        <div class="metric-label">Total Students</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Registered student accounts verified in the internal identity ledger database.</p>
+      </div>
+
+      <!-- Metric 2: Total Courses (Dynamic) -->
+      <div class="metric-card">
+        <div class="metric-label">Total Courses</div>
+        <div class="metric-value" id="course-count-display">0</div>
+        <p class="metric-desc">Live curricular course blueprints published across active module streams.</p>
+      </div>
+
+      <!-- Metric 3: Active Enrollments -->
+      <div class="metric-card">
+        <div class="metric-label">Active Enrollments</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Active instances where unique profiles are engaged in ongoing training tracks.</p>
+      </div>
+
+      <!-- Metric 4: Completion Reports -->
+      <div class="metric-card">
+        <div class="metric-label">Completion Reports</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Generated graduation logs, transcripts, and successfully distributed certificates.</p>
+      </div>
+
+    </section>
+    <!-- Course Capacity Tracking Panel Matrix -->
+    <section class="panel-box" style="background: rgba(255, 255, 255, 0.4); border: 1px solid var(--line); padding: 40px; border-radius: var(--radius); margin-top: 40px; margin-bottom: 60px;">
+      <h3 style="font-family: var(--display); font-size: 1.8rem; color: var(--ink); margin: 0 0 8px 0; font-weight: 500;">Module Enrollment Matrices</h3>
+      <p style="margin: 0 0 28px 0; font-size: 0.9rem; opacity: 0.7;">System-wide enrollment allocations categorized by individual course modules.</p>
+      
+      <div id="course-enrollment-bars-root" style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Programmatic catalog tracking bars render seamlessly here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Control System Footer Block -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack</span>
+      <div class="footer-note">© 2026 Admin Dashboard Access Environment.</div>
+    </div>
+  </footer>
+
+  <script>
+  // --- ADMIN WORKSPACE GUARD SECURITY LOCK ---
+  if (localStorage.getItem("isAdminVerified") !== "true") {
+    alert("Access Denied: Administrative credential signatures required.");
+    window.location.href = "admin-login.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    hydrateAdminMetrics();
+  });
+
+  function hydrateAdminMetrics() {
+    // 1. Fetch the master course directory array from local storage layers
+    const globalCourses = JSON.parse(localStorage.getItem("globalCourses")) || [];
+    const allProgressStats = JSON.parse(localStorage.getItem("studentProgressStats")) || {};
+
+    let totalActiveEnrollments = 0;
+    let completedCoursesCount = 0;
+    
+    // Create a unique set to count how many distinct student roll numbers exist
+    let uniqueStudents = new Set();
+
+    // Initialize an internal tracking object to count students per individual course id
+    let courseEnrollmentCounts = {};
+    globalCourses.forEach(course => {
+      courseEnrollmentCounts[course.id] = 0;
+    });
+
+    // 2. SCAN ALL BROWSER STORAGE KEYS DYNAMICALLY
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      // Look for any key matching the student enrollment prefix pattern
+      if (key && key.startsWith("enrolledTracks_")) {
+        // Extract the exact Roll Number from the key string
+        const studentId = key.replace("enrolledTracks_", "");
+        uniqueStudents.add(studentId); 
+
+        const studentEnrollments = JSON.parse(localStorage.getItem(key)) || [];
+        totalActiveEnrollments += studentEnrollments.length;
+
+        // Map each individual allocation into our distribution score counter
+        studentEnrollments.forEach(track => {
+          if (courseEnrollmentCounts.hasOwnProperty(track.courseId)) {
+            courseEnrollmentCounts[track.courseId]++;
+          }
+        });
+
+        // Compute system-wide final module completion frequencies
+        const studentProgress = allProgressStats[studentId] || {};
+        for (const courseId in studentProgress) {
+          if (studentProgress[courseId] === 100) {
+            completedCoursesCount++;
+          }
+        }
+      }
+    }
+
+    // 3. Inject computed records back into the main metrics overview cards
+    const cards = document.querySelectorAll('.metric-value');
+    if (cards.length >= 4) {
+      cards[0].innerText = uniqueStudents.size;       // Total Students Count
+      cards[1].innerText = globalCourses.length;       // Total Courses in Catalog
+      cards[2].innerText = totalActiveEnrollments;     // Active Enrollments Counter
+      cards[3].innerText = completedCoursesCount;      // Completed Course Modules
+    }
+
+    // 4. GENERATE LIVE CAPACITY BARS PER COURSE
+    const barsRoot = document.getElementById('course-enrollment-bars-root');
+    if (!barsRoot) return; // Guard clause in case the container isn't present
+    
+    barsRoot.innerHTML = "";
+
+    if (globalCourses.length === 0) {
+      barsRoot.innerHTML = `<p style="opacity:0.5; text-align:center; padding: 20px 0;">No active courses found inside storage registers.</p>`;
+      return;
+    }
+
+    // Set a baseline scaling max threshold rule (e.g., maximum target pool capacity is 10 students for prototype)
+    const maxPrototypeCapacity = 10;
+
+    globalCourses.forEach(course => {
+      const count = courseEnrollmentCounts[course.id] || 0;
+      // Convert count into a safe structural percentage width vector
+      const calculatedWidth = Math.min((count / maxPrototypeCapacity) * 100, 100);
+
+      const rowHTML = `
+        <div style="border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <div>
+              <strong style="color: var(--ink); font-size: 1.05rem;">${course.title}</strong>
+              <span style="font-size: 0.78rem; opacity: 0.6; margin-left: 8px; font-weight: 600; letter-spacing:0.05em;">[${course.id}]</span>
+            </div>
+            <span style="font-size: 0.88rem; font-weight: 700; color: var(--gold);">
+              ${count} ${count === 1 ? 'Student' : 'Students'} Enrolled
+            </span>
+          </div>
+          
+          <!-- Visual Distribution Track Bar Component -->
+          <div style="width: 100%; height: 14px; background: rgba(16,25,43,0.06); border-radius: 1px; overflow: hidden;">
+            <div style="
+              width: ${calculatedWidth === 0 ? '4px' : calculatedWidth + '%'}; 
+              height: 100%; 
+              background: ${calculatedWidth === 0 ? 'rgba(16,25,43,0.15)' : 'var(--ink)'}; 
+              transition: width 0.5s ease-out;
+            "></div>
+          </div>
+        </div>
+      `;
+      barsRoot.insertAdjacentHTML('beforeend', rowHTML);
+    });
+  }
+  function logoutAdmin() {
+    // 1. Scrub administrative credential tokens from memory
+    localStorage.removeItem("isAdminVerified");
+    
+    // 2. Clear any active student session properties to prevent state bleeding
+    localStorage.removeItem("isStudentLoggedIn");
+    localStorage.removeItem("studentName");
+    localStorage.removeItem("studentAcademicId");
+    
+    alert("Administrative session closed safely.");
+    
+    // 3. Clear workspace window navigation and redirect directly back home
+    window.location.href = "index.html";
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Control Panel — SkillTrack</title>
+  <style>
+    /* ============================================================
+       Student Dashboard Design Tokens (Ink, Parchment, Gold)
+       Palette : Ink #10192B · Parchment #F7F2E7 · Gold #B8893E
+                 Charcoal #2A2620 · Line rgba(16,25,43,0.14)
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --gold: #B8893E;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 32px; width: 100%; }
+    
+    /* Header Layout */
+    .site-header { 
+      background: rgba(247,242,231,0.92); 
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line); 
+    }
+    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+    .brand { 
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      color: var(--ink); 
+      font-family: var(--display); 
+      font-weight: 600; 
+      font-size: 1.3rem; 
+      text-decoration: none;
+    }
+    .brand circle, .brand path { stroke: var(--gold); fill: none; stroke-width: 1.2; }
+    
+    /* Buttons */
+    .btn { 
+      display: inline-flex; 
+      align-items: center; 
+      padding: 10px 20px; 
+      border-radius: var(--radius); 
+      font-weight: 600; 
+      font-size: 0.85rem; 
+      cursor: pointer; 
+      border: 1px solid transparent; 
+      text-decoration: none; 
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--ink); color: var(--parchment); }
+    .btn-primary:hover { background: var(--ink-soft); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+
+    /* Dashboard Layout */
+    .db-intro { margin: 50px 0 40px; }
+    .db-intro h1 { font-family: var(--display); font-size: 2.8rem; font-weight: 500; color: var(--ink); margin: 0 0 6px 0; }
+    .section-eyebrow { font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+
+    /* --- Custom Analytics Grid Matrix --- */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+    
+    @media (max-width: 768px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--gold);
+      padding: 32px;
+      border-radius: var(--radius);
+    }
+    .metric-label { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; }
+    .metric-value { font-family: var(--display); font-size: 3.5rem; font-weight: 600; color: var(--ink); line-height: 1.1; margin: 10px 0 4px; }
+    .metric-desc { font-size: 0.88rem; opacity: 0.7; margin: 0; }
+
+    /* --- Class Workspace Component --- */
+    .panel-box {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--line);
+      padding: 40px;
+      border-radius: var(--radius);
+      margin-bottom: 80px;
+    }
+    .panel-box h3 { font-family: var(--display); font-size: 1.8rem; color: var(--ink); margin: 0 0 24px 0; font-weight: 500; }
+    
+    .course-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .course-strip:last-child { border-bottom: none; padding-bottom: 0; }
+    .course-strip:first-child { padding-top: 0; }
+
+    .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; font-size: 0.8rem; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Portal Navigation Frame -->
+  <header class="site-header">
+    <div class="wrap">
+      <a href="courses.html" class="brand">
+        <svg style="width:32px; height:32px;" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="21"></circle>
+          <circle cx="24" cy="24" r="16"></circle>
+          <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        </svg>
+        <span>SkillTrack Portal</span>
+      </a>
+      <nav style="display: flex; gap: 16px;">
+        <a href="courses.html" class="btn btn-ghost">Browse Modules</a>
+        <button onclick="logoutStudent()" class="btn btn-primary">Sign Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Central Workspace Shell -->
+  <main class="wrap">
+    <div class="db-intro">
+      <div class="section-eyebrow">Student Terminal Workspace</div>
+      <h1 id="welcome-heading">Welcome Back</h1>
+      <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Track structural timeline metrics, analyze completion ratios, and access registered academic modules.</p>
+    </div>
+
+      <section class="wrap" style="margin-top: 40px; margin-bottom: 80px;">
+    <div style="background: rgba(255, 255, 255, 0.4); border: 1px solid var(--line); padding: 40px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; gap: 24px;">
+      
+      <div>
+        <h3 style="font-family: var(--display); font-size: 1.8rem; color: var(--ink); margin: 0 0 8px 0; font-weight: 500;">
+          My Academic Modules
+        </h3>
+        <p style="margin: 0; font-size: 0.92rem; opacity: 0.7;">
+          Track active timelines, review real-time progress metrics, and resume active learning pipelines.
+        </p>
+      </div>
+
+      <!-- THE GATEWAY LINKS PORTAL BUTTON -->
+      <a href="my-courses.html" class="btn btn-primary" style="white-space: nowrap; font-family: var(--body); font-weight: 600; font-size: 0.88rem; padding: 14px 28px; background: var(--ink); color: #fff; border: none; border-radius: var(--radius); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;">
+        Go to My Courses ↗
+      </a>
+      
+    </div>
+  </section>
+
+    <!-- Analytics Dashboard Metrics Row -->
+    <section class="metrics-grid">
+      
+      <!-- Metric 1: Total Courses Enrolled -->
+      <div class="metric-card">
+        <div class="metric-label">Total Courses Enrolled</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Total modules systematically mapped and cataloged onto your institutional registry ledger.</p>
+      </div>
+
+      <!-- Metric 2: Courses Completed -->
+      <div class="metric-card">
+        <div class="metric-label">Courses Completed</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Modules containing verified graduation flags, finalized targets, and archived transcripts.</p>
+      </div>
+
+      <!-- Metric 3: Ongoing Courses -->
+      <div class="metric-card">
+        <div class="metric-label">Ongoing Courses</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">Active module blueprints currently allocated onto your computational learning timeline path.</p>
+      </div>
+
+      <!-- Metric 4: Progress Statistics -->
+      <div class="metric-card">
+        <div class="metric-label">Progress Statistics</div>
+        <div class="metric-value">0%</div>
+        <p class="metric-desc">Aggregated structural metric completion percentage across all assigned curricular tracking lines.</p>
+      </div>
+
+    </section>
+    <!-- Enrolled Course Workspace Section Matrix -->
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">© 2026 Student Registry Core Environment. Secure Verification Architecture active.</div>
+  </footer>
+
+  <script>
+    // --- WORKSPACE GUARD SECURITY LOCK ---
+    if (localStorage.getItem("isStudentLoggedIn") !== "true") {
+      alert("Access Denied: Please log in using student credentials.");
+      window.location.href = "student-login.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const activeStudentName = localStorage.getItem("studentName") || "Student";
+      document.getElementById('welcome-heading').innerText = `Welcome Back, ${activeStudentName}`;
+      
+      hydrateDashboardMetrics();
+    });
+
+    function hydrateDashboardMetrics() {
+      // 1. Fetch current identities and arrays safely
+      const currentStudentId = localStorage.getItem("studentAcademicId") || "default";
+      const rawEnrolledTracks = JSON.parse(localStorage.getItem(`enrolledTracks_${currentStudentId}`)) || [];
+      const allProgressStats = JSON.parse(localStorage.getItem("studentProgressStats")) || {};
+      const globalCourses = JSON.parse(localStorage.getItem("globalCourses")) || [];
+      
+      const progressStats = allProgressStats[currentStudentId] || {};
+
+      // 🔥 THE FIX: Filter out any enrolled tracks whose course was deleted by an admin
+      const enrolledTracks = rawEnrolledTracks.filter(track => {
+        return globalCourses.some(c => c.id === track.courseId);
+      });
+
+      let totalEnrolled = enrolledTracks.length;
+      let completedCount = 0;
+      let ongoingCount = 0;
+      let aggregateSum = 0;
+
+      // Calculate progress math variables using the cleaned list
+      enrolledTracks.forEach(track => {
+        const percent = progressStats[track.courseId] || 0;
+        aggregateSum += percent;
+
+        if (percent === 100) {
+          completedCount++;
+        } else {
+          ongoingCount++;
+        }
+      });
+
+      const averageProgress = totalEnrolled > 0 ? Math.round(aggregateSum / totalEnrolled) : 0;
+
+      // 2. SAFE ANALYTICS CARD HYDRATION
+      const cards = document.querySelectorAll('.metric-value');
+      if (cards && cards.length >= 4) {
+        cards[0].innerText = totalEnrolled;     
+        cards[1].innerText = completedCount;    
+        cards[2].innerText = ongoingCount;     
+        cards[3].innerText = `${averageProgress}%`; 
+      }
+
+      // 3. SAFE RENDER CONTAINER INJECTION
+      const container = document.getElementById('student-enrollments-container');
+      if (!container) {
+        console.error("Target view portal element '#student-enrollments-container' was not found in the HTML.");
+        return; 
+      }
+      
+      container.innerHTML = "";
+
+      if (enrolledTracks.length === 0) {
+        container.innerHTML = `<p style="opacity:0.5; text-align:center; padding: 40px 0; grid-column: 1/-1;">You are not currently registered in any active learning courses.</p>`;
+        return;
+      }
+
+      enrolledTracks.forEach(track => {
+        // Since we filtered above, courseInfo will always find the correct master course data here safely!
+        const courseInfo = globalCourses.find(c => c.id === track.courseId) || { 
+          title: track.courseId, 
+          track: "General" 
+        };
+        const currentPercent = progressStats[track.courseId] || 0;
+
+        // Dynamic status button engine configuration text labels
+        let buttonText = "Start Module";
+        let buttonClass = "btn-primary";
+
+        if (currentPercent === 100) {
+          buttonText = "Completed ✓";
+          buttonClass = "btn-ghost"; 
+        } else if (currentPercent > 0) {
+          buttonText = "Resume Module";
+          buttonClass = "btn-primary"; 
+        }
+
+        const rowHTML = `
+          <!-- Elevated Architectural Course Card Container -->
+          <div class="course-card-item" style="
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+          ">
+            <div style="flex-grow: 1;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                <!-- Outlined Structural Box for Course ID -->
+                <span style="
+                  font-family: var(--body);
+                  font-size: 0.75rem;
+                  font-weight: 700;
+                  color: var(--gold);
+                  border: 1px solid var(--gold);
+                  padding: 4px 10px;
+                  border-radius: var(--radius);
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                  background: rgba(184, 137, 62, 0.04);
+                  white-space: nowrap;
+                ">
+                  ${courseInfo.id || track.courseId}
+                </span>
+                
+                <!-- Classification Track Micro Badge -->
+                <span style="
+                  font-size: 0.72rem;
+                  text-transform: uppercase;
+                  letter-spacing: 0.08em;
+                  opacity: 0.5;
+                  font-weight: 600;
+                ">
+                  • ${courseInfo.track} Track
+                </span>
+              </div>
+
+              <!-- Course Title -->
+              <h4 style="
+                font-family: var(--display); 
+                font-size: 1.4rem; 
+                color: var(--ink); 
+                margin: 0 0 14px 0; 
+                font-weight: 500;
+                line-height: 1.2;
+              ">
+                ${courseInfo.title}
+              </h4>
+              
+              <!-- Clean Minimalistic Progress Vector Track -->
+              <div style="display: flex; align-items: center; gap: 12px; max-width: 360px;">
+                <div style="flex-grow: 1; height: 6px; background: rgba(16,25,43,0.06); border-radius: 10px; overflow: hidden;">
+                  <div style="width: ${currentPercent}%; height: 100%; background: var(--ink); transition: width 0.4s ease;"></div>
+                </div>
+                <span style="font-size: 0.82rem; font-weight: 600; opacity: 0.7; white-space: nowrap;">
+                  ${currentPercent}% Complete
+                </span>
+              </div>
+            </div>
+            
+            <!-- Context Aware Action Control Routing Button -->
+            <a href="course-content.html?id=${track.courseId}" 
+               class="btn ${buttonClass}" 
+               style="padding: 12px 24px; font-size: 0.82rem; min-width: 150px; text-align: center; justify-content: center; white-space: nowrap; height: fit-content;">
+               ${buttonText}
+            </a>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', rowHTML);
+      });
+    }
+
+    function logoutStudent() {
+      localStorage.removeItem("isStudentLoggedIn");
+      localStorage.removeItem("studentName");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

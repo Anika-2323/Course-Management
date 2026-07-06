@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login — SkillTrack</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+  <aside class="auth-side">
+    <a href="index.html" class="brand">
+      <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21"></circle>
+        <circle cx="24" cy="24" r="16"></circle>
+        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+        <line x1="24" y1="31" x2="24" y2="37"></line>
+        <line x1="20" y1="37" x2="28" y2="37"></line>
+      </svg>
+      <span>
+        <span class="brand-name">SkillTrack</span>
+        <span class="brand-sub">Course &amp; Progress System</span>
+      </span>
+    </a>
+
+    <div class="auth-side-copy">
+      <p class="section-eyebrow">Welcome back</p>
+      <h2>Pick up exactly where you left off.</h2>
+      <p>Your enrolled courses, completed modules, and progress bars are waiting in your dashboard.</p>
+    </div>
+
+    <a class="auth-side-back" href="role.html">&larr; Choose a different role</a>
+
+    <svg class="auth-side-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="21"></circle>
+      <circle cx="24" cy="24" r="16"></circle>
+      <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+    </svg>
+  </aside>
+
+  <section class="auth-form-col">
+    <div class="auth-form-inner">
+      <p class="section-eyebrow">Student</p>
+      <h1>Log in</h1>
+      <p>Enter your registered email and password to continue.</p>
+
+      <!-- Target notice box element for displaying validation states -->
+      <div class="notice" id="login-notice"></div>
+
+      <form id="student-login-form">
+        <div class="field">
+          <label for="log-email">Email address</label>
+          <input id="log-email" name="email" type="email" placeholder="student@institute.edu" required>
+        </div>
+
+        <div class="field">
+          <label for="log-password">Password</label>
+          <input id="log-password" name="password" type="password" placeholder="Your password" required>
+        </div>
+
+        <div class="field-aux">
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button class="btn btn-gold btn-block" type="submit">Login</button>
+      </form>
+
+      <p class="form-foot">New to SkillTrack? <a href="student-register.html">Create an account</a></p>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/script.js"></script>
+
+<script>
+  // 1. Define our mock student database directory array
+  const mockStudentDatabase = [
+    {
+      email: "student@institute.edu",
+      password: "password",
+      name: "Anika",
+      academicId: "E24AI003"
+    },
+    {
+      email: "sister@institute.edu",
+      password: "password123",
+      name: "Janhavi",
+      academicId: "E24AI015"
+    }
+  ];
+
+  document.getElementById('student-login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+
+    const inputEmail = document.getElementById('log-email').value.trim();
+    const inputPassword = document.getElementById('log-password').value;
+    const notice = document.getElementById('login-notice');
+
+    // 2. Scan our directory array for a matching profile entry map
+    const matchedStudent = mockStudentDatabase.find(
+      s => s.email === inputEmail && s.password === inputPassword
+    );
+
+    if (matchedStudent) {
+      // Clear out old lingering admin sessions to avoid tracking collision bugs
+      localStorage.removeItem("isAdminVerified");
+
+      // 3. Commit this specific student's profile context parameters to storage memory
+      localStorage.setItem("isStudentLoggedIn", "true");
+      localStorage.setItem("studentName", matchedStudent.name);
+      localStorage.setItem("studentAcademicId", matchedStudent.academicId);
+
+      notice.className = "notice show success";
+      notice.innerText = `Login successful — Welcome, ${matchedStudent.name}. Redirecting...`;
+
+      setTimeout(function() {
+        window.location.href = "student-dashboard.html";
+      }, 1000);
+    } else {
+      notice.className = "notice show error";
+      notice.innerText = "Access Denied: Invalid student profile credentials or record match absent.";
+    }
+  });
+</script>
+</body>
+</html>

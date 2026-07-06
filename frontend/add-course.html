@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Architecture — Add Module</title>
+  <style>
+    /* ============================================================
+       Student Course Management — Design Tokens
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #10192B;
+      --ink-soft: #1C2A42;
+      --parchment: #F7F2E7;
+      --parchment-dim: #EFE7D6;
+      --gold: #B8893E;
+      --gold-soft: #D9B97C;
+      --burgundy: #6E2A36;
+      --burgundy-soft: #8C3F4C;
+      --charcoal: #2A2620;
+      --line: rgba(16,25,43,0.14);
+      --display: 'Fraunces', serif;
+      --body: 'Inter', sans-serif;
+      --radius: 2px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 32px;
+      width: 100%;
+    }
+
+    /* ---------- Crest ---------- */
+    .crest { width: 40px; height: 40px; flex-shrink: 0; }
+    .crest path, .crest circle { stroke: currentColor; fill: none; stroke-width: 1.1; }
+
+    /* ---------- Header ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247,242,231,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+    .brand { display: flex; align-items: center; gap: 14px; color: var(--ink); }
+    .brand .crest { color: var(--burgundy); } 
+    .brand-name { font-family: var(--display); font-weight: 600; font-size: 1.3rem; }
+    .brand-sub { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.55; }
+
+    /* ---------- Admin Configuration Form ---------- */
+    .config-container { max-width: 680px; margin: 60px auto 90px; }
+    .config-header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 40px; }
+    .config-title { font-family: var(--display); font-size: 2.4rem; font-weight: 500; color: var(--ink); margin: 0 0 8px 0; }
+    .section-eyebrow { font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--burgundy); font-weight: 600; margin-bottom: 10px; }
+
+    .field-group { margin-bottom: 32px; }
+    .field-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field-group input, .field-group select, .field-group textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 4px;
+      font-family: var(--body);
+      font-size: 1rem;
+      color: var(--charcoal);
+    }
+    .field-group textarea { border: 1px solid var(--line); border-radius: var(--radius); resize: vertical; min-height: 120px; padding: 12px; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--burgundy); }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-burgundy { background: var(--burgundy); color: var(--parchment); }
+    .btn-burgundy:hover { background: var(--burgundy-soft); }
+    .btn-ghost { background: transparent; border-color: var(--ink); color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--parchment); }
+
+    .form-actions { display: flex; justify-content: flex-end; gap: 16px; border-top: 1px solid var(--line); padding-top: 32px; margin-top: 40px; }
+
+    /* ---------- Security Modal Context Overlay ---------- */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(16, 25, 43, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-content {
+      background: var(--parchment);
+      border: 1px solid var(--burgundy);
+      max-width: 460px;
+      width: 90%;
+      padding: 40px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .modal h3 { font-family: var(--display); font-size: 1.8rem; margin: 0 0 10px 0; color: var(--ink); }
+    .modal p { font-size: 0.92rem; opacity: 0.75; margin: 0 0 24px 0; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; }
+    .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; }
+    .footer-note { font-size: 0.8rem; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="21"></circle>
+          <circle cx="24" cy="24" r="16"></circle>
+          <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+          <line x1="24" y1="31" x2="24" y2="37"></line>
+          <line x1="20" y1="37" x2="28" y2="37"></line>
+        </svg>
+        <div>
+          <span class="brand-name">SkillTrack</span>
+          <span class="brand-sub">Administrative Panel</span>
+        </div>
+      </div>
+      <a href="edit-course.html" class="btn btn-ghost" style="padding: 10px 20px; font-size: 0.8rem;">Return to Catalog</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="config-container">
+      <div class="config-header">
+        <div class="section-eyebrow">Schema Creation Engine</div>
+        <h1 class="config-title">Initialize New Module</h1>
+        <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Deploy a new structural course blueprint directly into the academic catalog matrix database.</p>
+      </div>
+
+      <form id="add-course-form" onsubmit="promptAdminSecurityVerification(event)">
+        <div class="field-row">
+          <div class="field-group">
+            <label for="course-id">Module Unique Code ID</label>
+            <input type="text" id="course-id" required placeholder="e.g., CS-401">
+          </div>
+          <div class="field-group">
+            <label for="course-meta">Module No. and Name</label>
+            <input type="text" id="course-meta" required placeholder="e.g., Module 04 • Artificial Intelligence">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="course-title">Course Program Title</label>
+          <input type="text" id="course-title" required placeholder="e.g., Introduction to Generative AI">
+        </div>
+
+        <div class="field-group">
+          <label for="course-desc">Structural Architecture Abstract Description</label>
+          <textarea id="course-desc" required placeholder="Outline the core technological concepts, syllabus structure details, and target frameworks..."></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="course-duration">Instructional Duration Scope</label>
+            <input type="text" id="course-duration" required placeholder="e.g., 6 Weeks">
+          </div>
+          <div class="field-group">
+            <label for="course-track">Complexity Classification Track</label>
+            <select id="course-track" required>
+              <option value="" disabled selected>Select execution path</option>
+              <option value="Foundational">Foundational</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Specialized">Specialized</option>
+              <option value="Labs">Labs</option>
+            </select>
+          </div>
+        </div>
+        <!-- NEW FIELD: Source Content URL Gateway -->
+        <div class="field-group" style="margin-top: 20px;">
+          <label for="course-source-url">Reference Content Source Website URL</label>
+          <input type="url" id="course-source-url" placeholder="e.g., https://www.geeksforgeeks.org/natural-language-processing-foundations/">
+          <small style="opacity: 0.6; display: block; margin-top: 4px;">Paste any educational article or documentation web link here. The textbook engine will capture this reference domain to frame your module reading assignments!</small>
+        </div>
+        <div class="field-group">
+          <label for="course-tasks">Syllabus Milestone Checkpoints (Comma-Separated)</label>
+          <textarea id="course-tasks" placeholder="e.g., Introduction to the Topic, Core Technical Methods, Advanced Implementation Details, Final Project Review" style="min-height: 80px;"></textarea>
+          <small style="opacity: 0.6; display: block; margin-top: 4px;">Type out the names of your learning modules separated by a clear comma (,). The system will automatically build an interactive multi-section textbook chapter for each one!</small>
+        </div>
+
+        <div class="form-actions">
+          <a href="edit-course.html" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-burgundy">Publish Module Blueprint</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Security Verification Gateway Modal -->
+  <div class="modal" id="admin-gate-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('admin-gate-modal')">&times;</button>
+      <div class="section-eyebrow" style="color: var(--burgundy);">Security Protocol</div>
+      <h3>Admin Credentials</h3>
+      <p>Writing new structural records directly to database layers requires immediate validation password processing.</p>
+      
+      <form id="admin-gate-form" onsubmit="verifyAndCommitCourse(event)">
+        <div class="field-group">
+          <label for="admin-email">Admin Email Address</label>
+          <input type="email" id="admin-email" required placeholder="admin@institute.edu">
+        </div>
+        <div class="field-group">
+          <label for="admin-pass">Security Password</label>
+          <input type="password" id="admin-pass" required placeholder="••••••••">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('admin-gate-modal')">Cancel</button>
+          <button type="submit" class="btn btn-burgundy">Verify</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack Authority System</span>
+      <div class="footer-note">© 2026 Direct Database Schema Protocol.</div>
+    </div>
+  </footer>
+
+  <script>
+    function promptAdminSecurityVerification(event) {
+      event.preventDefault(); 
+      document.getElementById('admin-gate-modal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function verifyAndCommitCourse(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('admin-email').value;
+      const pass = document.getElementById('admin-pass').value;
+
+      if (email === "admin@institute.edu" && pass === "password") {
+        
+        const courseId = document.getElementById('course-id').value.trim(); 
+        const trackMeta = document.getElementById('course-meta').value.trim(); 
+        const courseTitle = document.getElementById('course-title').value.trim();
+        const courseDesc = document.getElementById('course-desc').value.trim();
+        const duration = document.getElementById('course-duration').value.trim();
+        const complexityTrack = document.getElementById('course-track').value;
+        
+        // 1. Grab the custom source URL input field
+        const sourceUrl = document.getElementById('course-source-url').value.trim() || "https://www.geeksforgeeks.org";
+        
+        // Clean up the URL to make a pretty citation label (e.g., "geeksforgeeks.org")
+        let domainLabel = "educational repository";
+        try {
+          domainLabel = new URL(sourceUrl).hostname.replace('www.', '');
+        } catch(e) {
+          domainLabel = "reference library";
+        }
+
+        const rawTasks = document.getElementById('course-tasks').value.split(',');
+        const tasksArray = rawTasks.map((taskLabel, index) => {
+          const cleanLabel = taskLabel.trim();
+          
+          // Generate a custom focus paragraph based on the milestone name itself
+          const topicFocus = cleanLabel.toLowerCase().includes('ai') || cleanLabel.toLowerCase().includes('agent')
+            ? "autonomous system behaviors, state machine execution workflows, and decision-tree logic architecture"
+            : "data normalization processes, algorithmic efficiency metrics, and implementation blueprints";
+
+          return { 
+            id: `task${index + 1}`, 
+            label: cleanLabel,
+            title: `${index + 1}. ${cleanLabel}`,
+            
+            // --- HIGHLY RELEVANT DYNAMIC SIMULATED CONTENT ---
+            body: `
+              <h5 style="font-size: 1.1rem; color: var(--burgundy); margin: 0 0 8px 0;">I. Concept Introduction</h5>
+              <p>Welcome to the core curriculum study review for <strong>${cleanLabel}</strong>. This instructional segment explores the primary operational theories governing this domain, pulling framework contexts directly from the referenced architecture archives over at <strong>${domainLabel}</strong>.</p>
+              <p>Students will investigate the foundational parameters required to initialize, test, and validate core components under real-world production constraints.</p>
+              
+              <h5 style="font-size: 1.1rem; color: var(--burgundy); margin: 18px 0 8px 0;">II. Deep-Dive Operational Analysis</h5>
+              <p>When implementing <strong>${cleanLabel}</strong> workflows, standard engineering practices suggest isolating execution routines across distinct phases. The primary focus centers on <em>${topicFocus}</em>.</p>
+              <ul style="padding-left: 20px; margin: 8px 0;">
+                <li><strong>Phase 1 (Ingestion & Normalization):</strong> Streamlining incoming raw variables to fit expected execution structures cleanly.</li>
+                <li><strong>Phase 2 (Logic Evaluation):</strong> Processing the refined dataset through sequential algorithmic validation loops to guarantee output stability.</li>
+              </ul>
+              
+              <h5 style="font-size: 1.1rem; color: var(--burgundy); margin: 18px 0 8px 0;">III. Practical Field Application</h5>
+              <p>In modern software engineering and enterprise applications, mastering the mechanics of <strong>${cleanLabel}</strong> ensures high system reliability. Teams leverage these exact patterns to mitigate scaling bottlenecks and sustain continuous integration pipelines fluidly.</p>
+              
+              <div style="margin-top: 24px; padding: 12px 16px; background: rgba(16,25,43,0.04); border-left: 3px solid var(--gold); font-size: 0.88rem; opacity: 0.85;">
+                🌐 <strong>Curriculum Citation Node:</strong> Extended technical laboratory guides and primary reference documentation assets can be audited via the verified admin source link: <a href="${sourceUrl}" target="_blank" style="color: var(--burgundy); text-decoration: underline; font-weight: 600;">Open Reference Portal (${domainLabel})</a>
+              </div>
+            `
+          };
+        }).filter(t => t.label !== "");
+
+        const newCourseBlueprint = {
+          id: courseId,
+          meta: trackMeta || `Module ${courseId} • ${complexityTrack}`,
+          title: courseTitle,
+          desc: courseDesc,
+          duration: duration,
+          track: complexityTrack,
+          tasks: tasksArray,
+          materials: [
+            { name: `${courseId}_Syllabus_Overview.pdf`, size: "1.2 MB", type: "Curriculum Plan" }
+          ]
+        };
+
+        let globalCourses = JSON.parse(localStorage.getItem("globalCourses")) || [];
+        globalCourses.push(newCourseBlueprint);
+        localStorage.setItem("globalCourses", JSON.stringify(globalCourses));
+
+        alert("New structural course blueprint deployed directly into catalog matrix database layer.");
+        
+        closeModal('admin-gate-modal'); 
+        window.location.href = "edit-course.html";
+
+      } else {
+        alert("Invalid Security Password. Database record entry request rejected.");
+      }
+    }
+  </script>
+</body>
+</html>
