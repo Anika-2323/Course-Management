@@ -2,12 +2,6 @@
    SkillTrackNotify — shared client-side notification utility
    ------------------------------------------------------------
    Frontend-only stand-in for a real notification/email service.
-   Every "email" here is a locally stored preview object; nothing
-   is actually sent. Once a backend exists, swap the inside of
-   buildEmailPreview()/push() for real API calls.
-
-   Include this file BEFORE your page's own <script> with:
-     <script src="notifications-lib.js"></script>
    ============================================================ */
 (function (global) {
   const STORAGE_PREFIX = "skilltrackNotifications_";

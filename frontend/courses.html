@@ -104,7 +104,7 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 36px;
+      gap: 24px;
     }
     .nav-links .nav-item {
       font-size: 0.92rem;
@@ -286,6 +286,22 @@
 
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
 
+    /* 🔔 NOTIFICATION BELL HEADER BADGE STYLING */
+.header-actions { display: flex; align-items: center; gap: 16px; }
+.notif-bell-btn {
+  position: relative; background: transparent; border: none; font-size: 1.35rem;
+  cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s ease;
+}
+.notif-bell-btn:hover { transform: scale(1.05); }
+.notif-badge {
+  position: absolute; top: 0; right: 0; background: #D9383A; color: white;
+  font-family: var(--body); font-size: 0.68rem; font-weight: 700; min-width: 16px;
+  height: 16px; border-radius: 50%; display: none; align-items: center;
+  justify-content: center; padding: 0 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.notif-badge.active { display: flex; }
+
     /* ---------- Footer ---------- */
     .site-footer { border-top: 1px solid var(--line); padding: 44px 0; margin-top: auto; }
     .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
@@ -300,35 +316,42 @@
 <body>
 
   <!-- Sticky Top Navigation -->
-  <header class="site-header">
-    <div class="wrap">
-      <a href="index.html" class="brand">
-        <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sticky Top Navigation -->
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <circle cx="24" cy="24" r="21"></circle>
         <circle cx="24" cy="24" r="16"></circle>
         <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
         <line x1="24" y1="31" x2="24" y2="37"></line>
         <line x1="20" y1="37" x2="28" y2="37"></line>
       </svg>
-        <div>
-          <span class="brand-name">SkillTrack </span>
-          <span class="brand-sub">Curriculum & Learning</span>
-        </div>
-      </a>
-      <nav class="nav-links">
-        <a href="index.html" class="nav-item">Home</a>
-        <a href="courses.html" class="nav-item" style="opacity: 1; font-weight:600;">Courses</a>
-        
-        <!-- Dynamic Portal Interface Container Elements -->
-        <div id="nav-actions-wrapper" style="display: flex; align-items: center; gap: 12px;">
-          <a href="role.html" class="btn btn-ghost" id="nav-auth-btn">Portal Login</a>
-          <!-- Pointing to the self-contained session wiper -->
-          <button onclick="handleGlobalSessionLogout()" class="btn btn-ghost" id="nav-logout-btn" style="display: none; opacity: 0.7;">Sign Out</button>
-        </div>
-      </nav>
-    </div>
-  </header>
+      <div>
+        <span class="brand-name">SkillTrack</span>
+        <span class="brand-sub">Curriculum & Learning</span>
+      </div>
+    </a>
+    
+    <nav class="nav-links">
+      <a href="index.html" class="nav-item">Home</a>
+      <a href="courses.html" class="nav-item" style="opacity: 1; font-weight:600;">Courses</a>
+      
+      <!-- Dynamic Portal Interface Container Elements -->
+      <div id="nav-actions-wrapper" style="display: flex; align-items: center; gap: 12px;">
+        <a href="role.html" class="btn btn-ghost" id="nav-auth-btn">Portal Login</a>
+        <!-- Pointing to the self-contained session wiper -->
+        <button onclick="handleGlobalSessionLogout()" class="btn btn-ghost" id="nav-logout-btn" style="display: none; opacity: 0.7;">Sign Out</button>
+      </div>
 
+      <!-- Notification Bell Placed To the Right of Sign Out Wrapper -->
+      <a href="notifications.html" class="notif-bell-btn" title="View Notifications" style="text-decoration: none; margin-left: 12px;">
+        <span>🔔</span>
+        <span id="header-notif-badge" class="notif-badge">0</span>
+      </a>
+    </nav>
+  </div>
+</header>
   <!-- Core Content Container -->
   <main class="wrap section">
     
@@ -681,6 +704,34 @@
 
     function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
     function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    // Dynamically pull the Shared Notification Utility logic layer
+const libPath = window.location.pathname.includes('/frontend/') ? 'notifications-lib.js' : 'frontend/notifications-lib.js';
+const scriptEl = document.createElement('script');
+scriptEl.src = libPath;
+scriptEl.onload = function() {
+  updateHeaderNotificationBadge();
+};
+document.head.appendChild(scriptEl);
+
+// Keep badge count synced with the client database engine metrics
+function updateHeaderNotificationBadge() {
+  const badgeElement = document.getElementById('header-notif-badge');
+  if (!badgeElement) return;
+
+  if (typeof SkillTrackNotify !== 'undefined' && typeof SkillTrackNotify.unreadCount === 'function') {
+    const unreadCount = SkillTrackNotify.unreadCount();
+    if (unreadCount > 0) { 
+      badgeElement.innerText = unreadCount;
+      badgeElement.classList.add('active'); 
+    } else {
+      badgeElement.classList.remove('active');
+    }
+  }
+}
+
+// Watch for runtime events while on this template framework view layer
+window.addEventListener("skilltrack-notification", updateHeaderNotificationBadge);
   </script>
 </body>
 </html>
