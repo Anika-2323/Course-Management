@@ -74,38 +74,5 @@
 </div>
 
 <script src="js/script.js"></script>
-<script>
-  document.getElementById('admin-login-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Stop page from submitting normally
-
-    const email = document.getElementById('admin-email').value;
-    const password = document.getElementById('admin-password').value;
-    const notice = document.getElementById('login-notice');
-
-    // Perform validation check against required mock credentials
-    if (email === "admin@institute.edu" && password === "password") {
-      // Add this inside the successful admin authentication block inside admin-login.html
-      localStorage.removeItem("isStudentLoggedIn");
-      localStorage.removeItem("studentName");
-
-      // 1. Save login state across the workspace ecosystem
-      localStorage.setItem("isAdminVerified", "true");
-
-      // 2. Display success layout parameters
-      notice.className = "notice show success";
-      notice.innerText = "Login successful — redirecting to the administrative registry.";
-
-      // 3. Smooth redirect back to courses system panel after a split second
-      setTimeout(function() {
-        window.location.href = "courses.html";
-      }, 1000);
-      
-    } else {
-      // Display alert block when credential properties misalign
-      notice.className = "notice show error";
-      notice.innerText = "Access Denied: Invalid password.";
-    }
-  });
-</script>
 </body>
 </html>
