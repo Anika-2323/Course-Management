@@ -157,7 +157,6 @@
     <p>Your academic profile matrix hash has been securely verified. The requested module allocation configuration is now active on your curriculum timeline map.</p>
 
     <div class="actions-stack">
-      <!-- 1. Dynamically update this link using the script below -->
       <a href="#" id="start-learning-btn" class="btn btn-primary">Start Learning</a>
       <a href="student-dashboard.html" class="btn btn-ghost">Go to Student Dashboard</a>
     </div>
@@ -165,23 +164,6 @@
     <div class="footer-stamp">SkillTrack Ledger Authority</div>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // 2. Look up what course the student just registered for in memory
-      const records = JSON.parse(localStorage.getItem("enrolledTracks")) || [];
-      if (records.length > 0) {
-        const latestCourseId = records[records.length - 1].courseId;
-        // Map the button path to pass the specific course code forward
-        document.getElementById('start-learning-btn').href = `course-content.html?id=${latestCourseId}`;
-      } else {
-        // Fallback target if history is clear
-        document.getElementById('start-learning-btn').href = 'courses.html';
-      }
-    });
-  </script>
-
-    <div class="footer-stamp">SkillTrack Ledger Authority</div>
-  </div>
-
+  <script src="script.js"></script>
 </body>
 </html>

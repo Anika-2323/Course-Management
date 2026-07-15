@@ -74,56 +74,5 @@
 </div>
 
 <script src="js/script.js"></script>
-
-<script>
-  // 1. Define our mock student database directory array
-  const mockStudentDatabase = [
-    {
-      email: "student@institute.edu",
-      password: "password",
-      name: "Anika",
-      academicId: "E24AI003"
-    },
-    {
-      email: "sister@institute.edu",
-      password: "password123",
-      name: "Janhavi",
-      academicId: "E24AI015"
-    }
-  ];
-
-  document.getElementById('student-login-form').addEventListener('submit', function(event) {
-    event.preventDefault(); 
-
-    const inputEmail = document.getElementById('log-email').value.trim();
-    const inputPassword = document.getElementById('log-password').value;
-    const notice = document.getElementById('login-notice');
-
-    // 2. Scan our directory array for a matching profile entry map
-    const matchedStudent = mockStudentDatabase.find(
-      s => s.email === inputEmail && s.password === inputPassword
-    );
-
-    if (matchedStudent) {
-      // Clear out old lingering admin sessions to avoid tracking collision bugs
-      localStorage.removeItem("isAdminVerified");
-
-      // 3. Commit this specific student's profile context parameters to storage memory
-      localStorage.setItem("isStudentLoggedIn", "true");
-      localStorage.setItem("studentName", matchedStudent.name);
-      localStorage.setItem("studentAcademicId", matchedStudent.academicId);
-
-      notice.className = "notice show success";
-      notice.innerText = `Login successful — Welcome, ${matchedStudent.name}. Redirecting...`;
-
-      setTimeout(function() {
-        window.location.href = "student-dashboard.html";
-      }, 1000);
-    } else {
-      notice.className = "notice show error";
-      notice.innerText = "Access Denied: Invalid student profile credentials or record match absent.";
-    }
-  });
-</script>
 </body>
 </html>
