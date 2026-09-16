@@ -6,48 +6,34 @@
 // ============================================================================
 // 1. GLOBAL INTERACTION ROUTINES & SECURITY ROUTING (Runs on DOM Load)
 // ============================================================================
+// ============================================================================
+// 1. GLOBAL INTERACTION ROUTINES & SECURITY ROUTING (Runs on DOM Load)
+// ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Workspace Security Interceptor Guard ---
-  // If the current window environment is the admin dashboard dashboard shell, inspect security keys
   if (window.location.pathname.includes('admin-dashboard.html')) {
     if (localStorage.getItem("isAdminVerified") !== "true") {
       alert("Access Denied: Administrative credential signatures required.");
       window.location.href = "admin-login.html";
-      return; // Stop further thread execution
+      return; 
     }
-    // Hydrate the visual dashboard statistics layout matrix
-    hydrateAdminMetrics();
+    
+    // Only hydrate metrics if the elements actually exist on this page!
+    if (document.getElementById('course-enrollment-bars-root')) {
+      hydrateAdminMetrics();
+    }
   }
 
   // --- Generic Form Mock Submission Engine ---
-  // Intercepts forms marked with [data-mock-submit] to simulate network latency
   document.querySelectorAll('form[data-mock-submit]').forEach((form) => {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-
-      const notice = form.querySelector('.notice');
-      if (!notice) return;
-
-      notice.classList.remove('error');
-      notice.classList.add('success', 'show');
-      notice.textContent = form.dataset.successMessage || 'Submitted successfully.';
-
-      const btn = form.querySelector('button[type="submit"]');
-      if (btn) {
-        const original = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Please wait…';
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = original;
-        }, 1200);
-      }
+      // (Keep your existing mock submit body logic here...)
     });
   });
 
   // --- Dynamic Placeholder Dropdown Stylist ---
-  // Keeps select element text muted until a valid option is actively selected
   document.querySelectorAll('select[data-placeholder-select]').forEach((select) => {
     const update = () => {
       select.style.color = select.value ? 'var(--charcoal)' : 'rgba(42,38,32,0.45)';
@@ -1972,7 +1958,7 @@ function initializeStudentLoginEngine() {
     { email: "student@institute.edu", password: "password", name: "Anika", academicId: "E24AI003" },
     { email: "sister@institute.edu", password: "password123", name: "Janhavi", academicId: "E24AI015" }
   ]; //
-
+  
   loginForm.addEventListener('submit', function(event) {
     event.preventDefault(); //
 

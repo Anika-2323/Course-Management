@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academic Architecture — Admin Analytics</title>
+  <title>SkillTrack — Admin Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,20 +13,20 @@
     <div class="wrap">
       <div class="brand">
         <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="24" cy="24" r="21"></circle>
-        <circle cx="24" cy="24" r="16"></circle>
-        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
-        <line x1="24" y1="31" x2="24" y2="37"></line>
-        <line x1="20" y1="37" x2="28" y2="37"></line>
-      </svg>
+          <circle cx="24" cy="24" r="21"></circle>
+          <circle cx="24" cy="24" r="16"></circle>
+          <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+          <line x1="24" y1="31" x2="24" y2="37"></line>
+          <line x1="20" y1="37" x2="28" y2="37"></line>
+        </svg>
         <div>
           <span class="brand-name">SkillTrack</span>
-          <span class="brand-sub">Control Center</span>
+          <span class="brand-sub">Admin Panel</span>
         </div>
       </div>
       <nav class="nav-links">
         <a href="courses.html" class="btn btn-ghost">Go to Courses</a>
-        <button onclick="logoutAdmin()" class="btn btn-burgundy">Sign Out Session</button>
+        <button onclick="logoutAdmin()" class="btn btn-burgundy">Sign Out</button>
       </nav>
     </div>
   </header>
@@ -35,9 +35,9 @@
   <main class="wrap">
     
     <div class="db-header">
-      <div class="section-eyebrow">Administrative Intelligence</div>
-      <h1 class="db-title">Institutional Overview</h1>
-      <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Command control interface layer for tracking performance metrics and catalog allocations.</p>
+      <div class="section-eyebrow">Admin Panel</div>
+      <h1 class="db-title">Dashboard Overview</h1>
+      <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Track student registrations, total courses, active enrollments, and course completion rates.</p>
     </div>
 
     <!-- Analytics Dashboard Metrics Row -->
@@ -47,50 +47,51 @@
       <div class="metric-card">
         <div class="metric-label">Total Students</div>
         <div class="metric-value">0</div>
-        <p class="metric-desc">Registered student accounts verified in the internal identity ledger database.</p>
+        <p class="metric-desc">Registered student accounts saved in the database.</p>
       </div>
 
-      <!-- Metric 2: Total Courses (Dynamic) -->
+      <!-- Metric 2: Total Courses -->
       <div class="metric-card">
         <div class="metric-label">Total Courses</div>
         <div class="metric-value" id="course-count-display">0</div>
-        <p class="metric-desc">Live curricular course blueprints published across active module streams.</p>
+        <p class="metric-desc">Total active courses published in the course catalog.</p>
       </div>
 
       <!-- Metric 3: Active Enrollments -->
       <div class="metric-card">
         <div class="metric-label">Active Enrollments</div>
         <div class="metric-value">0</div>
-        <p class="metric-desc">Active instances where unique profiles are engaged in ongoing training tracks.</p>
+        <p class="metric-desc">Total course enrollments across all student accounts.</p>
       </div>
 
       <!-- Metric 4: Completion Reports -->
       <div class="metric-card">
-        <div class="metric-label">Completion Reports</div>
+        <div class="metric-label">Completed Courses</div>
         <div class="metric-value">0</div>
-        <p class="metric-desc">Generated graduation logs, transcripts, and successfully distributed certificates.</p>
+        <p class="metric-desc">Total number of courses completed by students.</p>
       </div>
 
     </section>
-    <!-- Course Capacity Tracking Panel Matrix -->
+
+    <!-- Course Enrollment Breakdown -->
     <section class="panel-box" style="background: rgba(255, 255, 255, 0.4); border: 1px solid var(--line); padding: 40px; border-radius: var(--radius); margin-top: 40px; margin-bottom: 60px;">
-      <h3 style="font-family: var(--display); font-size: 1.8rem; color: var(--ink); margin: 0 0 8px 0; font-weight: 500;">Module Enrollment Matrices</h3>
-      <p style="margin: 0 0 28px 0; font-size: 0.9rem; opacity: 0.7;">System-wide enrollment allocations categorized by individual course modules.</p>
+      <h3 style="font-family: var(--display); font-size: 1.8rem; color: var(--ink); margin: 0 0 8px 0; font-weight: 500;">Course Enrollment Breakdown</h3>
+      <p style="margin: 0 0 28px 0; font-size: 0.9rem; opacity: 0.7;">Number of enrolled students for each course.</p>
       
       <div id="course-enrollment-bars-root" style="display: flex; flex-direction: column; gap: 24px;">
-        <!-- Programmatic catalog tracking bars render seamlessly here -->
+        <!-- Programmatic course tracking bars render here -->
       </div>
     </section>
 
   </main>
 
-  <!-- Control System Footer Block -->
   <footer class="site-footer">
     <div class="wrap">
       <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack</span>
-      <div class="footer-note">© 2026 Admin Dashboard Access Environment.</div>
+      <div class="footer-note">© 2026 Admin Dashboard Environment.</div>
     </div>
   </footer>
-<script src="script.js"></script>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

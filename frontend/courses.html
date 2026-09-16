@@ -33,7 +33,7 @@
       
       <!-- Dynamic Portal Interface Container Elements -->
       <div id="nav-actions-wrapper" style="display: flex; align-items: center; gap: 12px;">
-        <a href="role.html" class="btn btn-ghost" id="nav-auth-btn">Portal Login</a>
+        <a href="role.html" id="nav-auth-btn" class="btn btn-ghost">Portal Login</a>
         <!-- Pointing to the self-contained session wiper -->
         <button onclick="handleGlobalSessionLogout()" class="btn btn-ghost" id="nav-logout-btn" style="display: none; opacity: 0.7;">Sign Out</button>
       </div>
@@ -188,6 +188,6 @@
   </footer>
 
   <!-- Application Interaction Logic Script -->
-  <script src="script.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

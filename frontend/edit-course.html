@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academic Architecture — Edit Module Blueprint</title>
+  <title>SkillTrack — Edit Course</title>
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 <body>
 
@@ -13,72 +12,73 @@
     <div class="wrap">
       <div class="brand">
         <svg class="crest" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="24" cy="24" r="21"></circle>
-        <circle cx="24" cy="24" r="16"></circle>
-        <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
-        <line x1="24" y1="31" x2="24" y2="37"></line>
-        <line x1="20" y1="37" x2="28" y2="37"></line>
-      </svg>
+          <circle cx="24" cy="24" r="21"></circle>
+          <circle cx="24" cy="24" r="16"></circle>
+          <path d="M24 13 L29 22 L24 31 L19 22 Z"></path>
+          <line x1="24" y1="31" x2="24" y2="37"></line>
+          <line x1="20" y1="37" x2="28" y2="37"></line>
+        </svg>
         <div>
           <span class="brand-name">SkillTrack</span>
-          <span class="brand-sub">Administrative Panel</span>
+          <span class="brand-sub">Admin Panel</span>
         </div>
       </div>
-      <a href="courses.html" class="btn btn-ghost" style="padding: 10px 20px; font-size: 0.8rem;">Return to Courses</a>
+      <a href="courses.html" class="btn btn-ghost" style="padding: 10px 20px; font-size: 0.8rem;">Back to Courses</a>
     </div>
   </header>
 
   <main class="wrap">
     <div class="config-container">
       <div class="config-header">
-        <div class="section-eyebrow" id="edit-eyebrow">Target Registry Allocation</div>
-        <h1 class="config-title" id="edit-title">Modify Module Schema</h1>
-        <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Alter technical operational fields, core descriptions, or metrics within this data blueprint asset mapping.</p>
+        <div class="section-eyebrow" id="edit-eyebrow">Course Settings</div>
+        <h1 class="config-title" id="edit-title">Edit Course Details</h1>
+        <p style="margin: 0; opacity: 0.7; font-size: 0.95rem;">Update the title, description, duration, or category for this course.</p>
       </div>
 
       <form id="edit-course-form" onsubmit="updateCourseData(event)">
         <div class="field-row">
           <div class="field-group">
-            <label for="edit-course-id">Module Unique Code ID (Locked)</label>
-            <input type="text" id="edit-course-id" readonly>
+            <label for="edit-course-id">Course Code (Cannot Change)</label>
+            <input type="text" id="edit-course-id" placeholder="e.g. CS-101" readonly>
           </div>
           <div class="field-group">
-            <label for="edit-course-meta">Catalog Track Meta Tag</label>
-            <input type="text" id="edit-course-meta" required>
+            <label for="edit-course-meta">Category Tag</label>
+            <input type="text" id="edit-course-meta" placeholder="Enter category (e.g. Module 01 • Automation)" required>
           </div>
         </div>
 
         <div class="field-group">
-          <label for="edit-course-title">Course Program Title</label>
-          <input type="text" id="edit-course-title" required>
+          <label for="edit-course-title">Course Title</label>
+          <input type="text" id="edit-course-title" placeholder="Enter course title..." required>
         </div>
 
         <div class="field-group">
-          <label for="edit-course-desc">Structural Architecture Abstract Description</label>
-          <textarea id="edit-course-desc" required></textarea>
+          <label for="edit-course-desc">Course Description</label>
+          <textarea id="edit-course-desc" placeholder="Enter course description..." required></textarea>
         </div>
 
         <div class="field-row">
           <div class="field-group">
-            <label for="edit-course-duration">Instructional Duration Scope</label>
-            <input type="text" id="edit-course-duration" required>
+            <label for="edit-course-duration">Course Duration</label>
+            <input type="text" id="edit-course-duration" placeholder="Enter duration (e.g. 8 Weeks)..." required>
           </div>
           <div class="field-group">
-            <label for="edit-course-track">Complexity Classification Track</label>
+            <label for="edit-course-track">Difficulty Level</label>
             <select id="edit-course-track" required>
-              <option value="Foundational">Foundational</option>
+              <option value="" disabled selected>Select level</option>
+              <option value="Foundational">Beginner</option>
               <option value="Advanced">Advanced</option>
               <option value="Specialized">Specialized</option>
-              <option value="Labs">Labs</option>
+              <option value="Labs">Practical / Labs</option>
             </select>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="button" class="btn-danger-text" onclick="deleteCourseSchema()">Delete Module Schema</button>
-          <div class="action-right">
-            <a href="courses.html" class="btn btn-ghost">Cancel Changes</a>
-            <button type="submit" class="btn btn-burgundy">Apply Schema Updates</button>
+        <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px;">
+          <button type="button" class="btn-danger-text" onclick="deleteCourseSchema()">Delete Course</button>
+          <div class="action-right" style="display: flex; gap: 12px;">
+            <a href="courses.html" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-burgundy">Save Changes</button>
           </div>
         </div>
       </form>
@@ -87,11 +87,11 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack Authority System</span>
-      <div class="footer-note">© 2026 Direct Database Schema Protocol.</div>
+      <span style="font-size: 0.9rem; font-weight: 500;">SkillTrack Portal</span>
+      <div class="footer-note">© 2026 SkillTrack. All rights reserved.</div>
     </div>
   </footer>
 
-  <script src="script.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
