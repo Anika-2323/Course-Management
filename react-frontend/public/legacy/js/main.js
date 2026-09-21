@@ -32,6 +32,7 @@ import {
   switchLMSTab,
   evaluateProgressMetricsUpdate 
 } from './classroom.js';
+import { initializeCertificateEngine } from './certificate.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Dynamic UI Navigation & Header State Updates
@@ -43,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3. Hydrate Classroom Hub & Video Player (If on course-content page)
   initializeClassroomHub();
   renderCoursesFromStorage();
+  initializeCertificateEngine();
 
   // 4. Hydrate Module Blueprint Editor Form (If on edit-course page)
   if (window.location.pathname.includes('edit-course.html')) {
