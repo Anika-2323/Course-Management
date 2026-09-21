@@ -36,7 +36,7 @@ export default function Courses() {
                         </Link>
                         {/* Dynamic Portal Interface Container Elements */}
                         <div id="nav-actions-wrapper" style={{display: "flex", alignItems: "center", gap: "12px"}}>
-                            <Link to="/role" id="nav-auth-btn" className="btn btn-ghost">
+                            <Link to="/student-dashboard" id="nav-auth-btn" className="btn btn-ghost">
                                 Portal Login
                             </Link>
                             {/* Pointing to the self-contained session wiper */}

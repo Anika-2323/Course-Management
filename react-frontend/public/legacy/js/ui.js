@@ -5,7 +5,7 @@ export function evaluateSessionInterfaceUpdate() {
   const authBtn = document.getElementById('nav-auth-btn') || document.querySelector('a[href="role.html"]');
   const logoutBtn = document.getElementById('nav-logout-btn');
 
-  const isStudentLoggedIn = localStorage.getItem("isStudentLoggedIn") === "true";
+  const isStudentLoggedIn = localStorage.getItem("isStudentLoggedIn") === "true" || Boolean(localStorage.getItem("loggedInStudent"));
   const isAdminVerified = localStorage.getItem("isAdminVerified") === "true";
 
   if (!authBtn) return;
@@ -330,11 +330,18 @@ export function renderCoursesFromStorage() {
   }
 
   const courses = JSON.parse(localStorage.getItem("globalCourses")) || defaultCourses;
+  const currentStudentId = localStorage.getItem("studentAcademicId") || "default";
+  const enrolledTracks = JSON.parse(localStorage.getItem(`enrolledTracks_${currentStudentId}`)) || [];
+  const enrolledCourseIds = new Set(enrolledTracks.map(track => track.courseId));
   grid.innerHTML = ""; 
 
   courses.forEach(course => {
     // Check both 'desc' and 'description' keys so it never evaluates to undefined
     const courseDescription = course.desc || course.description || "No description available for this course.";
+    const isEnrolled = enrolledCourseIds.has(course.id);
+    const enrollmentAction = isEnrolled
+      ? `<span class="btn btn-ghost" aria-label="Already enrolled in ${course.title}">Already Enrolled</span><a href="my-courses.html" class="btn btn-primary">My Courses</a>`
+      : `<button class="btn btn-primary" onclick="handleEnrollment('${course.id}', '${course.title.replace(/'/g, "\\'")}')">Enroll</button>`;
 
     const cardHTML = `
       <div class="course-card" data-course-id="${course.id}">
@@ -348,7 +355,7 @@ export function renderCoursesFromStorage() {
           </div>
         </div>
         <div class="course-actions">
-          <button class="btn btn-primary" onclick="handleEnrollment('${course.id}', '${course.title.replace(/'/g, "\\'")}')">Enroll</button>
+          ${enrollmentAction}
           <button class="btn btn-ghost" onclick="handleAdminEdit('${course.id}')">Edit Schema</button>
         </div>
       </div>

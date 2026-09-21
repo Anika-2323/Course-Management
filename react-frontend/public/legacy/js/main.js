@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 5. Hydrate Student Dashboard Metrics Cards
-  if (window.location.pathname.includes('student-dashboard.html')) {
+  if (window.location.pathname.includes('student-dashboard')) {
     hydrateStudentDashboardMetrics();
   }
 
