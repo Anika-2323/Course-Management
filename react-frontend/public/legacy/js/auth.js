@@ -15,6 +15,11 @@ export function handleStudentLogin(email, password) {
     localStorage.setItem("isStudentLoggedIn", "true");
     localStorage.setItem("studentName", matchedStudent.name);
     localStorage.setItem("studentAcademicId", matchedStudent.academicId);
+    localStorage.setItem("loggedInStudent", JSON.stringify({
+      name: matchedStudent.name,
+      email: matchedStudent.email,
+      academicId: matchedStudent.academicId
+    }));
     return { success: true, name: matchedStudent.name };
   }
   return { success: false, message: "Invalid student credentials." };
@@ -33,6 +38,7 @@ export function logoutStudent() {
   localStorage.removeItem("isStudentLoggedIn");
   localStorage.removeItem("studentName");
   localStorage.removeItem("studentAcademicId");
+  localStorage.removeItem("loggedInStudent");
   window.location.href = "index.html";
 }
 
@@ -47,6 +53,7 @@ export function handleGlobalSessionLogout() {
   localStorage.removeItem("studentName");
   localStorage.removeItem("studentAcademicId");
   localStorage.removeItem("isAdminVerified");
+  localStorage.removeItem("loggedInStudent");
   alert("Session closed safely.");
   window.location.href = "index.html";
 }
@@ -156,6 +163,7 @@ export function closeModal(modalId) {
 export function handleAdminLogin(email, password) {
   if (email === "admin@institute.edu" && password === "password") {
     // Clear student tokens to prevent session overlap
+    localStorage.removeItem("loggedInStudent");
     localStorage.removeItem("isStudentLoggedIn");
     localStorage.removeItem("studentName");
     localStorage.removeItem("studentAcademicId");

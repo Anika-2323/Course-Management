@@ -1,4 +1,4 @@
-// Retained as an empty pass-through so existing pages don't throw import errors
+// Retained as a pass-through for existing page imports.
 export default function PageCss() {
     return null;
 }

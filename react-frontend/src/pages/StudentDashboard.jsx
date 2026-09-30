@@ -1,8 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { useCourses } from "../context/CourseContext";
+import { getEnrollmentProgress } from "../utils/enrollment";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function StudentDashboard() {
+    const { courses, enrollments } = useCourses();
+    const { loggedInStudent, logoutStudent } = useAuth();
+    const navigate = useNavigate();
+    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId;
+    const myEnrollments = enrollments.filter((enrollment) => String(enrollment.studentId) === String(studentId));
+    const completedCourses = myEnrollments.filter((enrollment) => getEnrollmentProgress(enrollment, courses.find((course) => String(course.id) === String(enrollment.courseId))) === 100).length;
+    const averageProgress = myEnrollments.length
+        ? Math.round(myEnrollments.reduce((total, enrollment) => total + getEnrollmentProgress(enrollment, courses.find((course) => String(course.id) === String(enrollment.courseId))), 0) / myEnrollments.length)
+        : 0;
+
+    function handleSignOut() {
+        logoutStudent();
+        navigate("/student-login", { replace: true });
+    }
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -23,7 +40,7 @@ export default function StudentDashboard() {
                         <Link to="/courses" className="btn btn-ghost">
                             Browse Modules
                         </Link>
-                        <button className="btn btn-ghost" onClick={() => window.eval("logoutStudent()")}>
+                        <button className="btn btn-ghost" onClick={handleSignOut}>
                             Sign Out
                         </button>
                     </nav>
@@ -36,7 +53,7 @@ export default function StudentDashboard() {
                         Student Terminal Workspace
                     </div>
                     <h1 id="welcome-heading">
-                        Welcome Back
+                        Welcome Back{loggedInStudent?.name ? `, ${loggedInStudent.name}` : ""}
                     </h1>
                     <p style={{margin: "0", opacity: "0.7", fontSize: "0.95rem"}}>
                         Track structural timeline metrics, analyze completion ratios, and access registered academic modules.
@@ -66,7 +83,7 @@ export default function StudentDashboard() {
                             Total Courses Enrolled
                         </div>
                         <div className="metric-value">
-                            0
+                            {myEnrollments.length}
                         </div>
                         <p className="metric-desc">
                             Total modules systematically mapped and cataloged onto your institutional registry ledger.
@@ -78,7 +95,7 @@ export default function StudentDashboard() {
                             Courses Completed
                         </div>
                         <div className="metric-value">
-                            0
+                            {completedCourses}
                         </div>
                         <p className="metric-desc">
                             Modules containing verified graduation flags, finalized targets, and archived transcripts.
@@ -90,7 +107,7 @@ export default function StudentDashboard() {
                             Ongoing Courses
                         </div>
                         <div className="metric-value">
-                            0
+                            {myEnrollments.length - completedCourses}
                         </div>
                         <p className="metric-desc">
                             Active module blueprints currently allocated onto your computational learning timeline path.
@@ -102,21 +119,47 @@ export default function StudentDashboard() {
                             Progress Statistics
                         </div>
                         <div className="metric-value">
-                            0%
+                            {averageProgress}%
                         </div>
                         <p className="metric-desc">
                             Aggregated structural metric completion percentage across all assigned curricular tracking lines.
                         </p>
                     </div>
                 </section>
-                {/* Enrolled Course Workspace Section Matrix */}
+                <section className="section" style={{paddingBottom: "60px"}}>
+                    <div className="workspace-header">
+                        <div>
+                            <h2 className="workspace-title">Course Progress</h2>
+                            <p style={{margin: 0, opacity: "0.7"}}>Your enrolled courses and current completion.</p>
+                        </div>
+                        <Link to="/my-courses" className="btn btn-ghost">View My Courses</Link>
+                    </div>
+                    {myEnrollments.length === 0 ? <p>No enrolled courses yet. <Link to="/courses">Browse courses</Link></p> : (
+                        <div className="course-grid">
+                            {myEnrollments.map((enrollment) => {
+                                const course = courses.find((item) => String(item.id) === String(enrollment.courseId));
+                                const progress = getEnrollmentProgress(enrollment, course);
+                                return (
+                                    <article className="course-card" key={enrollment.id}>
+                                        <div className="course-meta">{course?.courseCode || enrollment.courseId}</div>
+                                        <h3>{course?.courseName || "Course"}</h3>
+                                        <div className="progress-track" role="progressbar" aria-label={`${course?.courseName || "Course"} progress`} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">
+                                            <div className="progress-fill" style={{width: `${progress}%`}} />
+                                        </div>
+                                        <p>{progress}% complete</p>
+                                        <Link to={`/course-content?id=${encodeURIComponent(enrollment.courseId)}`} className="btn btn-primary">Continue Course</Link>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    )}
+                </section>
             </main>
             <footer className="site-footer">
                 <div className="wrap">
                     © 2026 Student Registry Core Environment. Secure Verification Architecture active.
                 </div>
             </footer>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }

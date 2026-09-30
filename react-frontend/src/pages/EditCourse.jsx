@@ -1,8 +1,42 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useCourses } from "../context/CourseContext";
+import CourseForm from "../components/CourseForm";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function EditCourse() {
+    const [searchParams] = useSearchParams();
+    const courseId = searchParams.get("id");
+    const { courses, loading, updateCourse, deleteCourse } = useCourses();
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
+    const course = courses.find((item) => String(item.id) === courseId);
+
+    async function handleSubmit(updatedCourse) {
+        try {
+            setError("");
+            await updateCourse(course.id, updatedCourse);
+            navigate("/admin-dashboard");
+        } catch (saveError) {
+            console.error("Failed to update course:", saveError);
+            setError("Unable to save course changes. Please try again.");
+        }
+    }
+
+    async function handleDelete() {
+        if (!window.confirm(`Delete ${course.courseName}? This cannot be undone.`)) return;
+        try {
+            await deleteCourse(course.id);
+            navigate("/admin-dashboard");
+        } catch (deleteError) {
+            console.error("Failed to delete course:", deleteError);
+            setError("Unable to delete the course. Please try again.");
+        }
+    }
+
+    if (loading) return <main className="wrap section">Loading course...</main>;
+    if (!course) return <main className="wrap section"><p className="notice show error">Course not found.</p><Link to="/admin-dashboard">Back to Admin Dashboard</Link></main>;
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -25,8 +59,8 @@ export default function EditCourse() {
                             </span>
                         </div>
                     </div>
-                    <Link to="/courses" className="btn btn-ghost" style={{padding: "10px 20px", fontSize: "0.8rem"}}>
-                        Back to Courses
+                    <Link to="/admin-dashboard" className="btn btn-ghost" style={{padding: "10px 20px", fontSize: "0.8rem"}}>
+                        Admin Dashboard
                     </Link>
                 </div>
             </header>
@@ -43,77 +77,7 @@ export default function EditCourse() {
                             Update the title, description, duration, or category for this course.
                         </p>
                     </div>
-                    <form id="edit-course-form" onSubmit={() => window.eval("updateCourseData(event)")}>
-                        <div className="field-row">
-                            <div className="field-group">
-                                <label htmlFor="edit-course-id">
-                                    Course Code (Cannot Change)
-                                </label>
-                                <input type="text" id="edit-course-id" placeholder="e.g. CS-101" readOnly="" />
-                            </div>
-                            <div className="field-group">
-                                <label htmlFor="edit-course-meta">
-                                    Category Tag
-                                </label>
-                                <input type="text" id="edit-course-meta" placeholder="Enter category (e.g. Module 01 • Automation)" required="" />
-                            </div>
-                        </div>
-                        <div className="field-group">
-                            <label htmlFor="edit-course-title">
-                                Course Title
-                            </label>
-                            <input type="text" id="edit-course-title" placeholder="Enter course title..." required="" />
-                        </div>
-                        <div className="field-group">
-                            <label htmlFor="edit-course-desc">
-                                Course Description
-                            </label>
-                            <textarea id="edit-course-desc" placeholder="Enter course description..." required=""></textarea>
-                        </div>
-                        <div className="field-row">
-                            <div className="field-group">
-                                <label htmlFor="edit-course-duration">
-                                    Course Duration
-                                </label>
-                                <input type="text" id="edit-course-duration" placeholder="Enter duration (e.g. 8 Weeks)..." required="" />
-                            </div>
-                            <div className="field-group">
-                                <label htmlFor="edit-course-track">
-                                    Difficulty Level
-                                </label>
-                                <select id="edit-course-track" required="">
-                                    <option value="" disabled="" selected="">
-                                        Select level
-                                    </option>
-                                    <option value="Foundational">
-                                        Beginner
-                                    </option>
-                                    <option value="Advanced">
-                                        Advanced
-                                    </option>
-                                    <option value="Specialized">
-                                        Specialized
-                                    </option>
-                                    <option value="Labs">
-                                        Practical / Labs
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="form-actions" style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "32px"}}>
-                            <button type="button" className="btn-danger-text" onClick={() => window.eval("deleteCourseSchema()")}>
-                                Delete Course
-                            </button>
-                            <div className="action-right" style={{display: "flex", gap: "12px"}}>
-                                <Link to="/courses" className="btn btn-ghost">
-                                    Cancel
-                                </Link>
-                                <button type="submit" className="btn btn-burgundy">
-                                    Save Changes
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                    <CourseForm course={course} submitLabel="Save Changes" onSubmit={handleSubmit} onDelete={handleDelete} error={error} />
                 </div>
             </main>
             <footer className="site-footer">
@@ -126,7 +90,6 @@ export default function EditCourse() {
                     </div>
                 </div>
             </footer>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }

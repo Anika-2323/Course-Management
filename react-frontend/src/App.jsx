@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { useAuth } from "./auth/AuthContext";
 import Home from "./pages/Home";
 import RoleSelect from "./pages/RoleSelect";
 import StudentLogin from "./pages/StudentLogin";
@@ -14,6 +15,15 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
 import Notifications from "./pages/Notifications";
+
+function AdminOnly({ children }) {
+  const { loggedInAdmin } = useAuth();
+  const location = useLocation();
+
+  return loggedInAdmin
+    ? children
+    : <Navigate to={`/admin-login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+}
 
 function App() {
   return (
@@ -47,12 +57,12 @@ function App() {
       {/* Admin Operations */}
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-login.html" element={<AdminLogin />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-      <Route path="/admin-dashboard.html" element={<AdminDashboard />} />
-      <Route path="/add-course" element={<AddCourse />} />
-      <Route path="/add-course.html" element={<AddCourse />} />
-      <Route path="/edit-course" element={<EditCourse />} />
-      <Route path="/edit-course.html" element={<EditCourse />} />
+      <Route path="/admin-dashboard" element={<AdminOnly><AdminDashboard /></AdminOnly>} />
+      <Route path="/admin-dashboard.html" element={<AdminOnly><AdminDashboard /></AdminOnly>} />
+      <Route path="/add-course" element={<AdminOnly><AddCourse /></AdminOnly>} />
+      <Route path="/add-course.html" element={<AdminOnly><AddCourse /></AdminOnly>} />
+      <Route path="/edit-course" element={<AdminOnly><EditCourse /></AdminOnly>} />
+      <Route path="/edit-course.html" element={<AdminOnly><EditCourse /></AdminOnly>} />
 
       {/* Notifications */}
       <Route path="/notifications" element={<Notifications />} />

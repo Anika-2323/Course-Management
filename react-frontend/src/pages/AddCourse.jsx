@@ -1,8 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useCourses } from "../context/CourseContext";
+import CourseForm from "../components/CourseForm";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function AddCourse() {
+    const { addCourse } = useCourses();
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
+
+    async function handleSubmit(course) {
+        try {
+            setError("");
+            await addCourse(course);
+            navigate("/admin-dashboard");
+        } catch (saveError) {
+            console.error("Failed to add course:", saveError);
+            setError("Unable to publish the course. Please try again.");
+        }
+    }
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -25,9 +42,8 @@ export default function AddCourse() {
                             </span>
                         </div>
                     </div>
-                    {/* Fixed link: Points directly to courses.html */}
-                    <Link to="/courses" className="btn btn-ghost" style={{padding: "10px 20px", fontSize: "0.8rem"}}>
-                        Return to Courses
+                    <Link to="/admin-dashboard" className="btn btn-ghost" style={{padding: "10px 20px", fontSize: "0.8rem"}}>
+                        Admin Dashboard
                     </Link>
                 </div>
             </header>
@@ -44,82 +60,7 @@ export default function AddCourse() {
                             Fill out the course information below to publish it to the student catalog.
                         </p>
                     </div>
-                    <form id="add-course-form" onSubmit={() => window.eval("verifyAndCommitCourse(event)")}>
-                        <div className="field-row">
-                            <div className="field-group">
-                                <label htmlFor="course-id">
-                                    Course Code
-                                </label>
-                                <input type="text" id="course-id" required="" placeholder="e.g. CS-402" />
-                            </div>
-                            <div className="field-group">
-                                <label htmlFor="course-meta">
-                                    Category Tag
-                                </label>
-                                <input type="text" id="course-meta" required="" placeholder="e.g. Module 04 • Artificial Intelligence" />
-                            </div>
-                        </div>
-                        <div className="field-group">
-                            <label htmlFor="course-title">
-                                Course Title
-                            </label>
-                            <input type="text" id="course-title" required="" placeholder="e.g. Deep Learning and Neural Networks" />
-                        </div>
-                        <div className="field-group">
-                            <label htmlFor="course-desc">
-                                Course Description
-                            </label>
-                            <textarea id="course-desc" required="" placeholder="Enter course description..."></textarea>
-                        </div>
-                        <div className="field-row">
-                            <div className="field-group">
-                                <label htmlFor="course-duration">
-                                    Course Duration
-                                </label>
-                                <input type="text" id="course-duration" required="" placeholder="e.g. 8 Weeks" />
-                            </div>
-                            <div className="field-group">
-                                <label htmlFor="course-track">
-                                    Difficulty Level
-                                </label>
-                                <select id="course-track" required="">
-                                    <option value="" disabled="" selected="">
-                                        Select level
-                                    </option>
-                                    <option value="Foundational">
-                                        Beginner
-                                    </option>
-                                    <option value="Advanced">
-                                        Advanced
-                                    </option>
-                                    <option value="Specialized">
-                                        Specialized
-                                    </option>
-                                    <option value="Labs">
-                                        Practical / Labs
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="field-group">
-                            <label htmlFor="course-tasks">
-                                Syllabus Modules (Comma-Separated)
-                            </label>
-                            <textarea id="course-tasks" placeholder="e.g. Introduction to Neural Networks, CNNs, Transformers, Final Project" style={{minHeight: "80px"}} required=""></textarea>
-                            <small style={{opacity: "0.6", display: "block", marginTop: "4px"}}>
-                                Separate module titles with a comma (,). These form your course checklist.
-                            </small>
-                        </div>
-                        <div className="form-actions" style={{display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "32px"}}>
-                            {/* Fixed link: Points directly to courses.html */}
-                            <Link to="/courses" className="btn btn-ghost">
-                                Cancel
-                            </Link>
-                            <button type="submit" className="btn btn-burgundy">
-                                Publish Course
-                            </button>
-                        </div>
-                    </form>
+                    <CourseForm submitLabel="Publish Course" onSubmit={handleSubmit} error={error} />
                 </div>
             </main>
             <footer className="site-footer">
@@ -132,7 +73,6 @@ export default function AddCourse() {
                     </div>
                 </div>
             </footer>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }

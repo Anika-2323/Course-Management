@@ -89,7 +89,11 @@ document.addEventListener("DOMContentLoaded", () => {
           notice.innerText = "Login successful — Redirecting...";
         }
         setTimeout(() => {
-          window.location.href = "student-dashboard.html";
+          const redirect = new URLSearchParams(window.location.search).get("redirect");
+          const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+            ? redirect
+            : "/student-dashboard";
+          window.location.href = target;
         }, 1000);
       } else {
         if (notice) {

@@ -9,17 +9,19 @@ export function AuthProvider({ children }) {
         try {
             return JSON.parse(data);
         } catch {
-            return data;
+            localStorage.removeItem("loggedInStudent");
+            return null;
         }
     });
 
     const [loggedInAdmin, setLoggedInAdmin] = useState(() => {
         const data = localStorage.getItem("loggedInAdmin");
-        if (!data) return null;
+        if (!data) return localStorage.getItem("isAdminVerified") === "true" ? { role: "admin" } : null;
         try {
             return JSON.parse(data);
         } catch {
-            return data;
+            localStorage.removeItem("loggedInAdmin");
+            return null;
         }
     });
 
@@ -29,18 +31,24 @@ export function AuthProvider({ children }) {
     }
 
     function loginAdmin(admin) {
+        logoutStudent();
         setLoggedInAdmin(admin);
         localStorage.setItem("loggedInAdmin", JSON.stringify(admin));
+        localStorage.setItem("isAdminVerified", "true");
     }
 
     function logoutStudent() {
         setLoggedInStudent(null);
         localStorage.removeItem("loggedInStudent");
+        localStorage.removeItem("isStudentLoggedIn");
+        localStorage.removeItem("studentName");
+        localStorage.removeItem("studentAcademicId");
     }
 
     function logoutAdmin() {
         setLoggedInAdmin(null);
         localStorage.removeItem("loggedInAdmin");
+        localStorage.removeItem("isAdminVerified");
     }
 
     function logout(role) {

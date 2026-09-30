@@ -1,8 +1,35 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { useCourses } from "../context/CourseContext";
+import { getEnrollmentProgress } from "../utils/enrollment";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function AdminDashboard() {
+    const { logoutAdmin } = useAuth();
+    const { courses, enrollments, loading, deleteCourse } = useCourses();
+    const [error, setError] = useState("");
+    const completedEnrollments = enrollments.filter((enrollment) =>
+        getEnrollmentProgress(enrollment, courses.find((course) => String(course.id) === String(enrollment.courseId))) === 100
+    );
+    const enrolledStudentCount = new Set(enrollments.map((enrollment) => enrollment.studentId)).size;
+
+    async function handleDelete(course) {
+        if (!window.confirm(`Delete ${course.courseName}? This cannot be undone.`)) return;
+        try {
+            setError("");
+            await deleteCourse(course.id);
+        } catch (deleteError) {
+            console.error("Failed to delete course:", deleteError);
+            setError("Unable to delete the course. Please try again.");
+        }
+    }
+
+    function handleSignOut() {
+        logoutAdmin();
+        window.location.assign("/");
+    }
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -30,7 +57,10 @@ export default function AdminDashboard() {
                         <Link to="/courses" className="btn btn-ghost">
                             Go to Courses
                         </Link>
-                        <button onClick={() => window.eval("logoutAdmin()")} className="btn btn-burgundy">
+                        <Link to="/add-course" className="btn btn-burgundy">
+                            Add Course
+                        </Link>
+                        <button onClick={handleSignOut} className="btn btn-ghost">
                             Sign Out
                         </button>
                     </nav>
@@ -54,13 +84,13 @@ export default function AdminDashboard() {
                     {/* Metric 1: Total Students */}
                     <div className="metric-card">
                         <div className="metric-label">
-                            Total Students
+                            Students With Enrollments
                         </div>
                         <div className="metric-value">
-                            0
+                            {enrolledStudentCount}
                         </div>
                         <p className="metric-desc">
-                            Registered student accounts saved in the database.
+                            Distinct students with at least one course enrollment.
                         </p>
                     </div>
                     {/* Metric 2: Total Courses */}
@@ -69,7 +99,7 @@ export default function AdminDashboard() {
                             Total Courses
                         </div>
                         <div className="metric-value" id="course-count-display">
-                            0
+                            {courses.length}
                         </div>
                         <p className="metric-desc">
                             Total active courses published in the course catalog.
@@ -78,10 +108,10 @@ export default function AdminDashboard() {
                     {/* Metric 3: Active Enrollments */}
                     <div className="metric-card">
                         <div className="metric-label">
-                            Active Enrollments
+                            Total Enrollments
                         </div>
                         <div className="metric-value">
-                            0
+                            {enrollments.length}
                         </div>
                         <p className="metric-desc">
                             Total course enrollments across all student accounts.
@@ -93,24 +123,45 @@ export default function AdminDashboard() {
                             Completed Courses
                         </div>
                         <div className="metric-value">
-                            0
+                            {completedEnrollments.length}
                         </div>
                         <p className="metric-desc">
                             Total number of courses completed by students.
                         </p>
                     </div>
                 </section>
-                {/* Course Enrollment Breakdown */}
-                <section className="panel-box" style={{background: "rgba(255, 255, 255, 0.4)", border: "1px solid var(--line)", padding: "40px", borderRadius: "var(--radius)", marginTop: "40px", marginBottom: "60px"}}>
-                    <h3 style={{fontFamily: "var(--display)", fontSize: "1.8rem", color: "var(--ink)", margin: "0 0 8px 0", fontWeight: "500"}}>
-                        Course Enrollment Breakdown
-                    </h3>
-                    <p style={{margin: "0 0 28px 0", fontSize: "0.9rem", opacity: "0.7"}}>
-                        Number of enrolled students for each course.
-                    </p>
-                    <div id="course-enrollment-bars-root" style={{display: "flex", flexDirection: "column", gap: "24px"}}>
-                        {/* Programmatic course tracking bars render here */}
+                <section className="section" style={{paddingTop: "20px", paddingBottom: "60px"}}>
+                    <div className="workspace-header">
+                        <div>
+                            <h2 className="workspace-title">Course Registry</h2>
+                            <p style={{margin: 0, opacity: "0.7"}}>Manage courses stored in the mock API database.</p>
+                        </div>
                     </div>
+                    {error && <p className="notice show error" role="alert">{error}</p>}
+                    {loading ? <p>Loading courses...</p> : courses.length === 0 ? <p>No courses have been added yet.</p> : (
+                        <div className="course-grid">
+                            {courses.map((course) => (
+                                <article className="course-card" key={course.id}>
+                                    <div>
+                                        <div className="course-meta">{course.courseCode} • {course.category}</div>
+                                        <h3>{course.courseName}</h3>
+                                        <p className="course-desc">{course.overview}</p>
+                                        <div className="course-details-row">
+                                            <span><strong>Duration:</strong> {course.duration}</span>
+                                            <span><strong>Level:</strong> {course.level}</span>
+                                        </div>
+                                        <p className="course-meta">
+                                            {enrollments.filter((enrollment) => String(enrollment.courseId) === String(course.id)).length} student enrollments
+                                        </p>
+                                    </div>
+                                    <div className="course-actions">
+                                        <Link to={`/edit-course?id=${encodeURIComponent(course.id)}`} className="btn btn-ghost">Edit</Link>
+                                        <button className="btn btn-ghost" onClick={() => handleDelete(course)}>Delete</button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </section>
             </main>
             <footer className="site-footer">
@@ -123,7 +174,6 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </footer>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }

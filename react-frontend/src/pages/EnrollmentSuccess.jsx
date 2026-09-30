@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function EnrollmentSuccess() {
+    const { state } = useLocation();
+    const courseId = state?.courseId;
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -21,22 +23,16 @@ export default function EnrollmentSuccess() {
                 <h1>
                     Seat Allocated Successfully
                 </h1>
-                <p>
-                    Your academic profile matrix hash has been securely verified. The requested module allocation configuration is now active on your curriculum timeline map.
-                </p>
+                <p>Your enrollment in {state?.courseName || "the course"} is complete. You can begin learning now or return to your dashboard.</p>
                 <div className="actions-stack">
-                    <a href="#" id="start-learning-btn" className="btn btn-primary">
-                        Start Learning
-                    </a>
-                    <Link to="/student-dashboard" className="btn btn-ghost">
-                        Go to Student Dashboard
-                    </Link>
+                    {courseId && <Link to={`/course-content?id=${encodeURIComponent(courseId)}`} className="btn btn-primary">Go to Course Content</Link>}
+                    <Link to="/my-courses" className="btn btn-ghost">Go to My Courses</Link>
+                    <Link to="/student-dashboard" className="btn btn-ghost">Go to Student Dashboard</Link>
                 </div>
                 <div className="footer-stamp">
                     SkillTrack Ledger Authority
                 </div>
             </div>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }

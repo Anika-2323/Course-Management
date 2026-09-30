@@ -1,8 +1,28 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 import PageCss from "../components/PageCss";
-import LegacyScript from "../components/LegacyScript";
 
 export default function AdminLogin() {
+    const { loginAdmin } = useAuth();
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        if (email !== "admin@institute.edu" || password !== "password") {
+            setError("Access denied: invalid administrator credentials.");
+            return;
+        }
+
+        loginAdmin({ email, role: "admin" });
+        navigate("/admin-dashboard", { replace: true });
+    }
+
     return (
         <>
             <PageCss href="/css/style.css" />
@@ -57,19 +77,19 @@ export default function AdminLogin() {
                             This area is restricted to authorized administrators only.
                         </p>
                         {/* Notice box styled to display error or success messages */}
-                        <div className="notice" id="login-notice"></div>
-                        <form id="admin-login-form">
+                        {error && <div className="notice show error" role="alert">{error}</div>}
+                        <form onSubmit={handleSubmit}>
                             <div className="field">
                                 <label htmlFor="admin-email">
                                     Admin email
                                 </label>
-                                <input id="admin-email" name="email" type="email" placeholder="admin@institute.edu" required="" />
+                                <input id="admin-email" name="email" type="email" placeholder="admin@institute.edu" required />
                             </div>
                             <div className="field">
                                 <label htmlFor="admin-password">
                                     Password
                                 </label>
-                                <input id="admin-password" name="password" type="password" placeholder="Your password" required="" />
+                                <input id="admin-password" name="password" type="password" placeholder="Your password" required />
                             </div>
                             <div className="field-aux">
                                 <a href="#" style={{color: "var(--burgundy)"}}>
@@ -86,7 +106,6 @@ export default function AdminLogin() {
                     </div>
                 </section>
             </div>
-            <LegacyScript src="/legacy/js/main.js" module={true} />
         </>
     );
 }
