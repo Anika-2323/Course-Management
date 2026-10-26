@@ -7,7 +7,7 @@ import PageCss from "../components/PageCss";
 export default function MyCourses() {
     const { loggedInStudent } = useAuth();
     const { courses, enrollments } = useCourses();
-    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId;
+    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
     const myEnrollments = enrollments.filter((enrollment) => String(enrollment.studentId) === String(studentId));
 
     return (

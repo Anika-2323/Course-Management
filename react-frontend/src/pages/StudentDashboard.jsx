@@ -8,7 +8,7 @@ export default function StudentDashboard() {
     const { courses, enrollments } = useCourses();
     const { loggedInStudent, logoutStudent } = useAuth();
     const navigate = useNavigate();
-    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId;
+    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
     const myEnrollments = enrollments.filter((enrollment) => String(enrollment.studentId) === String(studentId));
     const completedCourses = myEnrollments.filter((enrollment) => getEnrollmentProgress(enrollment, courses.find((course) => String(course.id) === String(enrollment.courseId))) === 100).length;
     const averageProgress = myEnrollments.length

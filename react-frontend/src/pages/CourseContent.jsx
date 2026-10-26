@@ -13,7 +13,7 @@ export default function CourseContent() {
     const { courses, enrollments, enrollmentsLoading, updateEnrollmentProgress } = useCourses();
     const courseId = searchParams.get("id");
     const course = courses.find((item) => String(item.id) === String(courseId));
-    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId;
+    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
     const enrollment = enrollments.find((item) =>
         String(item.courseId) === String(courseId) && String(item.studentId) === String(studentId)
     );

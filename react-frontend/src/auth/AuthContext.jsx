@@ -43,6 +43,8 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("isStudentLoggedIn");
         localStorage.removeItem("studentName");
         localStorage.removeItem("studentAcademicId");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("studentUser");
     }
 
     function logoutAdmin() {

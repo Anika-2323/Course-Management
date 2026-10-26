@@ -13,7 +13,7 @@ export function CourseProvider({ children }) {
   async function fetchCourses() {
     try {
       setLoading(true);
-      const response = await api.get("/courses");
+      const response = await api.get("/api/courses");
       setCourses(response.data);
       setError(null);
     } catch (err) {
@@ -43,19 +43,19 @@ export function CourseProvider({ children }) {
   }
 
   async function addCourse(course) {
-    const response = await api.post("/courses", course);
+    const response = await api.post("/api/courses", course);
     setCourses((prev) => [...prev, response.data]);
   }
 
   async function updateCourse(id, updatedCourse) {
-    const response = await api.put(`/courses/${id}`, updatedCourse);
+    const response = await api.put(`/api/courses/${id}`, updatedCourse);
     setCourses((prev) =>
       prev.map((c) => (c.id === id ? response.data : c))
     );
   }
 
   async function deleteCourse(id) {
-    await api.delete(`/courses/${id}`);
+    await api.delete(`/api/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c.id !== id));
   }
 

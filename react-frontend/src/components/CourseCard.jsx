@@ -21,7 +21,7 @@ export default function CourseCard({ course }) {
     level,
     category
   } = course;
-  const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId;
+  const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
   const alreadyEnrolled = enrollments.some((enrollment) =>
     String(enrollment.courseId) === String(id) && String(enrollment.studentId) === String(studentId)
   );
