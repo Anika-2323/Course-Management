@@ -1,7 +1,33 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
+import { getCompletedCourseModules, getCourseModules } from "../utils/enrollment";
 
 const CourseContext = createContext(null);
+
+function resolveEndpoint(path) {
+  const base = api.defaults.baseURL || "";
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  if (base.endsWith("/api/v1")) {
+    return cleanPath.replace(/^\/?(api\/)?v1\//, "/").replace(/^\/api\//, "/");
+  }
+  if (base.endsWith("/api")) {
+    return cleanPath.replace(/^\/api\//, "/");
+  }
+  return cleanPath.startsWith("/api") ? cleanPath : `/api${cleanPath}`;
+}
+
+function normalizeEnrollment(enrollment) {
+  const course = enrollment.course;
+  const student = enrollment.student;
+
+  return {
+    ...enrollment,
+    id: enrollment._id || enrollment.id,
+    courseId: enrollment.courseId || (typeof course === "object" ? course?._id : course),
+    studentId: enrollment.studentId || (typeof student === "object" ? student?._id : student),
+    completedModules: Array.isArray(enrollment.completedModules) ? enrollment.completedModules : []
+  };
+}
 
 export function CourseProvider({ children }) {
   const [courses, setCourses] = useState([]);
@@ -13,12 +39,13 @@ export function CourseProvider({ children }) {
   async function fetchCourses() {
     try {
       setLoading(true);
-      const response = await api.get("/api/courses");
-      setCourses(response.data);
+      const endpoint = resolveEndpoint("/courses");
+      const response = await api.get(endpoint);
+      setCourses(Array.isArray(response.data) ? response.data : []);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch courses:", err);
-      setError("Unable to load courses.");
+      setError("Unable to load courses from database.");
     } finally {
       setLoading(false);
     }
@@ -31,11 +58,16 @@ export function CourseProvider({ children }) {
 
   async function fetchEnrollments() {
     try {
-      const response = await api.get("/enrolledTracks");
-      setEnrollments(response.data);
-      return response.data;
+      const endpoint = resolveEndpoint("/enrollments");
+      const response = await api.get(endpoint);
+      const enrollmentsData = Array.isArray(response.data)
+        ? response.data
+        : response.data?.enrollments;
+      const data = Array.isArray(enrollmentsData) ? enrollmentsData.map(normalizeEnrollment) : [];
+      setEnrollments(data);
+      return data;
     } catch (err) {
-      console.error("Failed to fetch enrollments:", err);
+      setEnrollments([]);
       return [];
     } finally {
       setEnrollmentsLoading(false);
@@ -43,64 +75,59 @@ export function CourseProvider({ children }) {
   }
 
   async function addCourse(course) {
-    const response = await api.post("/api/courses", course);
+    const endpoint = resolveEndpoint("/courses");
+    const response = await api.post(endpoint, course);
     setCourses((prev) => [...prev, response.data]);
+    return response.data;
   }
 
   async function updateCourse(id, updatedCourse) {
-    const response = await api.put(`/api/courses/${id}`, updatedCourse);
+    const endpoint = resolveEndpoint(`/courses/${id}`);
+    const response = await api.put(endpoint, updatedCourse);
     setCourses((prev) =>
-      prev.map((c) => (c.id === id ? response.data : c))
+      prev.map((c) => (String(c._id || c.id) === String(id) ? response.data : c))
     );
+    return response.data;
   }
 
   async function deleteCourse(id) {
-    await api.delete(`/api/courses/${id}`);
-    setCourses((prev) => prev.filter((c) => c.id !== id));
+    const endpoint = resolveEndpoint(`/courses/${id}`);
+    await api.delete(endpoint);
+    setCourses((prev) => prev.filter((c) => String(c._id || c.id) !== String(id)));
   }
 
   async function enrollInCourse(courseId, studentId, studentName, rollNumber) {
-    const { data: existingEnrollments } = await api.get("/enrolledTracks", {
-      params: { courseId, studentId }
-    });
-
-    if (existingEnrollments.length > 0) {
-      const existing = existingEnrollments[0];
-      const updated = await api.patch(`/enrolledTracks/${existing.id}`, {
-        studentName,
-        rollNumber
-      });
-      setEnrollments((prev) => prev.some((item) => item.id === existing.id)
-        ? prev.map((item) => item.id === existing.id ? updated.data : item)
-        : [...prev, updated.data]
-      );
-      return updated.data;
-    }
-
-    const response = await api.post("/enrolledTracks", {
+    const endpoint = resolveEndpoint("/enrollments");
+    const response = await api.post(endpoint, {
       courseId,
       studentId,
       studentName,
       rollNumber,
-      completedModules: [],
-      progress: 0,
       enrolledAt: new Date().toISOString()
     });
-    setEnrollments((prev) => [...prev, response.data]);
-    return response.data;
+    const enrollment = normalizeEnrollment(response.data?.enrollment || response.data);
+    setEnrollments((prev) => [...prev, enrollment]);
+    return enrollment;
   }
 
   async function updateEnrollmentProgress(enrollment, course, completedModules) {
-    const progress = course.modules?.length
-      ? Math.round((completedModules.length / course.modules.length) * 100)
-      : 0;
-    const response = await api.patch(`/enrolledTracks/${enrollment.id}`, {
-      completedModules,
+    const courseModules = getCourseModules(course);
+    const validCompletedModules = getCompletedCourseModules({ completedModules }, course);
+    const totalModules = courseModules.length || 1;
+    const progress = Math.round((validCompletedModules.length / totalModules) * 100);
+    const enrollmentId = enrollment._id || enrollment.id;
+
+    const endpoint = resolveEndpoint(`/enrollments/${enrollmentId}`);
+    const response = await api.put(endpoint, {
+      completedModules: validCompletedModules,
       progress,
       status: progress === 100 ? "completed" : "active"
     });
-    setEnrollments((prev) => prev.map((item) => item.id === enrollment.id ? response.data : item));
-    return response.data;
+    const updatedEnrollment = normalizeEnrollment(response.data?.enrollment || response.data);
+    setEnrollments((prev) =>
+      prev.map((item) => ((item._id || item.id) === enrollmentId ? updatedEnrollment : item))
+    );
+    return updatedEnrollment;
   }
 
   return (

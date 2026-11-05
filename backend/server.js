@@ -1,16 +1,37 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
+const helmet = require("helmet");
 const morgan = require("morgan");
-
-dotenv.config();
+const http = require("http");
+const connectDB = require("./config/db");
+const initializeSocket = require("./config/socket");
 
 const app = express();
+const server = http.createServer(app);
+initializeSocket(server);
 
 // -------------------------
-// Middleware
+// Security & Core Middleware
 // -------------------------
-app.use(cors());
+app.use(helmet());
+
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim());
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Origin not allowed by CORS"));
+    },
+    credentials: true
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -19,9 +40,7 @@ app.use(morgan("dev"));
 // Test & Health Check Routes
 // -------------------------
 app.get("/", (req, res) => {
-  res.json({
-    message: "Student Course Management API is running"
-  });
+  res.json({ message: "Student Course Management API is running" });
 });
 
 app.get("/api/health", (req, res) => {
@@ -37,35 +56,64 @@ app.get("/api/health", (req, res) => {
 // -------------------------
 const courseRoutes = require("./routes/courseRoutes");
 const authRoutes = require("./routes/authRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 const enrollmentRoutes = require("./routes/enrollmentRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const errorHandler = require("./middleware/errorHandler");
 
-// Mount course routes under both /api/courses and /api/v1/courses for compatibility
+app.use("/api/v1/profile", profileRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
+app.use("/api/v1/enrollments", enrollmentRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/v1/courses", courseRoutes);
-
-// Mount authentication routes under /api/v1/auth
 app.use("/api/v1/auth", authRoutes);
-app.use("/enrolledTracks", enrollmentRoutes);
+app.use("/api/v1/students", studentRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/v1/messages", messageRoutes);
+
+// Unknown API Route Handler (Task 14, Activity 14.4)
+app.use((req, res) => {
+  res.status(404).json({
+    message: "API endpoint not found"
+  });
+});
+// Centralized Error Handling Middleware
+app.use(errorHandler);
 
 // -------------------------
-// Global Error Handler
+// Process-Level Exception Handlers (Task 14, Activity 14.10)
 // -------------------------
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    message: err.message || "Internal Server Error"
-  });
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled rejection:", error);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+  process.exit(1);
 });
 
 // -------------------------
-// Server
+// Start Server with Database
 // -------------------------
 const PORT = process.env.PORT || 5000;
 
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+if (process.env.NODE_ENV !== "test") {
+  (async () => {
+    try {
+      await connectDB();
+      server.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+      });
+    } catch (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+  })();
 }
 
 module.exports = app;

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useCourses } from "../context/CourseContext";
-import { getEnrollmentProgress } from "../utils/enrollment";
+import { getEnrollmentCourse, getEnrollmentProgress } from "../utils/enrollment";
 import PageCss from "../components/PageCss";
 
 export default function AdminDashboard() {
@@ -10,15 +10,17 @@ export default function AdminDashboard() {
     const { courses, enrollments, loading, deleteCourse } = useCourses();
     const [error, setError] = useState("");
     const completedEnrollments = enrollments.filter((enrollment) =>
-        getEnrollmentProgress(enrollment, courses.find((course) => String(course.id) === String(enrollment.courseId))) === 100
+        getEnrollmentProgress(enrollment, getEnrollmentCourse(enrollment, courses)) === 100
     );
-    const enrolledStudentCount = new Set(enrollments.map((enrollment) => enrollment.studentId)).size;
+    const enrolledStudentCount = new Set(enrollments.map((enrollment) => enrollment.studentId).filter(Boolean)).size;
 
     async function handleDelete(course) {
-        if (!window.confirm(`Delete ${course.courseName}? This cannot be undone.`)) return;
+        const courseName = course.courseName || course.title || "this course";
+        const courseId = course._id || course.id;
+        if (!window.confirm(`Delete ${courseName}? This cannot be undone.`)) return;
         try {
             setError("");
-            await deleteCourse(course.id);
+            await deleteCourse(courseId);
         } catch (deleteError) {
             console.error("Failed to delete course:", deleteError);
             setError("Unable to delete the course. Please try again.");
@@ -134,32 +136,46 @@ export default function AdminDashboard() {
                     <div className="workspace-header">
                         <div>
                             <h2 className="workspace-title">Course Registry</h2>
-                            <p style={{margin: 0, opacity: "0.7"}}>Manage courses stored in the mock API database.</p>
+                            <p style={{margin: 0, opacity: "0.7"}}>Manage courses stored in the course database.</p>
                         </div>
                     </div>
                     {error && <p className="notice show error" role="alert">{error}</p>}
                     {loading ? <p>Loading courses...</p> : courses.length === 0 ? <p>No courses have been added yet.</p> : (
                         <div className="course-grid">
-                            {courses.map((course) => (
-                                <article className="course-card" key={course.id}>
+                            {courses.map((course) => {
+                                const courseId = course._id || course.id;
+                                const courseName = course.courseName || course.title || "Untitled Course";
+                                const overview = course.overview || course.description || "";
+                                const duration = typeof course.duration === "number"
+                                    ? `${course.duration} Weeks`
+                                    : course.duration || "Self-paced";
+                                const courseEnrollments = enrollments.filter((enrollment) =>
+                                    String(getEnrollmentCourse(enrollment, courses)?._id ||
+                                        getEnrollmentCourse(enrollment, courses)?.id ||
+                                        enrollment.courseId) === String(courseId)
+                                );
+
+                                return (
+                                <article className="course-card" key={courseId}>
                                     <div>
-                                        <div className="course-meta">{course.courseCode} • {course.category}</div>
-                                        <h3>{course.courseName}</h3>
-                                        <p className="course-desc">{course.overview}</p>
+                                        <div className="course-meta">{course.courseCode || "Course"} • {course.category || "General"}</div>
+                                        <h3>{courseName}</h3>
+                                        <p className="course-desc">{overview}</p>
                                         <div className="course-details-row">
-                                            <span><strong>Duration:</strong> {course.duration}</span>
-                                            <span><strong>Level:</strong> {course.level}</span>
+                                            <span><strong>Duration:</strong> {duration}</span>
+                                            <span><strong>Level:</strong> {course.level || "Beginner"}</span>
                                         </div>
                                         <p className="course-meta">
-                                            {enrollments.filter((enrollment) => String(enrollment.courseId) === String(course.id)).length} student enrollments
+                                            {courseEnrollments.length} student enrollments
                                         </p>
                                     </div>
                                     <div className="course-actions">
-                                        <Link to={`/edit-course?id=${encodeURIComponent(course.id)}`} className="btn btn-ghost">Edit</Link>
+                                        <Link to={`/edit-course?id=${encodeURIComponent(courseId)}`} className="btn btn-ghost">Edit</Link>
                                         <button className="btn btn-ghost" onClick={() => handleDelete(course)}>Delete</button>
                                     </div>
                                 </article>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </section>

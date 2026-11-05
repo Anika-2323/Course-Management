@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../middleware/authMiddleware");
+const authModule = require("../middleware/authMiddleware");
+const authMiddleware = authModule.protect || authModule;
+
 const {
   getCourses,
   getCourseById,
   createCourse,
   updateCourse,
-  deleteCourse
+  deleteCourse,
 } = require("../controllers/courseController");
 
 router.route("/")

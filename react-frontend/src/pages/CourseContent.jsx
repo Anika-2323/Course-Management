@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useCourses } from "../context/CourseContext";
-import { getEnrollmentProgress } from "../utils/enrollment";
+import { getCompletedCourseModules, getCourseModules, getEnrollmentProgress } from "../utils/enrollment";
 import PageCss from "../components/PageCss";
 
 export default function CourseContent() {
@@ -10,14 +10,18 @@ export default function CourseContent() {
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
     const { loggedInStudent } = useAuth();
-    const { courses, enrollments, enrollmentsLoading, updateEnrollmentProgress } = useCourses();
+    const { courses, enrollments, enrollmentsLoading, loading, updateEnrollmentProgress } = useCourses();
     const courseId = searchParams.get("id");
-    const course = courses.find((item) => String(item.id) === String(courseId));
-    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
+    const course = courses.find((item) => String(item._id || item.id) === String(courseId));
+    const modules = getCourseModules(course);
+
+    // Match any identifier stored on the student profile
+    const studentId = loggedInStudent?._id || loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
     const enrollment = enrollments.find((item) =>
-        String(item.courseId) === String(courseId) && String(item.studentId) === String(studentId)
+        String(item.courseId) === String(courseId) &&
+        (String(item.studentId) === String(studentId) || String(item.studentId) === String(loggedInStudent?.email))
     );
-    const completedModules = Array.isArray(enrollment?.completedModules) ? enrollment.completedModules : [];
+    const completedModules = getCompletedCourseModules(enrollment || {}, course);
     const progress = course ? getEnrollmentProgress(enrollment || {}, course) : 0;
 
     async function toggleModule(moduleName) {
@@ -47,12 +51,16 @@ export default function CourseContent() {
                 </div>
             </header>
             <main className="wrap classroom-container" style={{maxWidth: "1100px", margin: "0 auto", padding: "40px 20px 80px"}}>
-                {!course ? <p>Course not found. <Link to="/courses">Browse courses</Link></p> : (
+                {loading ? (
+                    <p style={{ textAlign: "center", padding: "40px 0" }}>Loading course content...</p>
+                ) : !course ? (
+                    <p>Course not found. <Link to="/courses">Browse courses</Link></p>
+                ) : (
                     <>
                         <div style={{marginBottom: "32px", borderBottom: "1px solid var(--line)", paddingBottom: "24px"}}>
                             <div className="section-eyebrow">{course.courseCode || "Course"} | {course.category}</div>
-                            <h1 style={{fontFamily: "var(--display)", color: "var(--ink)", fontSize: "2.5rem", margin: "8px 0 12px 0", fontWeight: "500"}}>{course.courseName}</h1>
-                            <p style={{margin: 0, opacity: "0.75", lineHeight: "1.6"}}>{course.overview}</p>
+                            <h1 style={{fontFamily: "var(--display)", color: "var(--ink)", fontSize: "2.5rem", margin: "8px 0 12px 0", fontWeight: "500"}}>{course.courseName || course.title}</h1>
+                            <p style={{margin: 0, opacity: "0.75", lineHeight: "1.6"}}>{course.overview || course.description}</p>
                         </div>
                         {enrollmentsLoading ? <p>Loading your enrollment...</p> : !enrollment ? (
                             <p>This course is not enrolled under your account. <Link to="/courses">Return to the course catalog</Link>.</p>
@@ -63,24 +71,30 @@ export default function CourseContent() {
                                     <div className="progress-bar-bg" role="progressbar" aria-label="Course progress" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">
                                         <div className="progress-bar-fill" style={{width: `${progress}%`}} />
                                     </div>
+                                    {progress === 100 && (
+                                        <Link to={`/certificate?courseId=${encodeURIComponent(courseId)}`} className="btn btn-primary" style={{ marginTop: "20px" }}>
+                                            View Certificate
+                                        </Link>
+                                    )}
                                 </section>
                                 {error && <p className="notice error show" role="alert">{error}</p>}
                                 <h2 className="workspace-title">Course Modules</h2>
                                 <div className="modules-stack">
-                                    {(course.modules || []).map((moduleName, index) => {
+                                    {modules.map((moduleName, index) => {
                                         const complete = completedModules.includes(moduleName);
                                         return (
                                             <label className={`module-card${complete ? " completed" : ""}`} key={moduleName}>
                                                 <span className="module-info">
                                                     <h3>{moduleName}</h3>
-                                                    <p>Module {index + 1} of {course.modules.length}</p>
+                                                    <p>Module {index + 1} of {modules.length}</p>
                                                 </span>
                                                 <input type="checkbox" checked={complete} disabled={saving} onChange={() => toggleModule(moduleName)} aria-label={`Mark ${moduleName} complete`} />
                                             </label>
                                         );
                                     })}
                                 </div>
-                                <p style={{marginTop: "20px"}}>{saving ? "Saving progress..." : `${completedModules.length} of ${course.modules?.length || 0} modules completed`}</p>
+                                {modules.length === 0 && <p>No course modules are available yet. Ask an administrator to add them to this course.</p>}
+                                <p style={{marginTop: "20px"}}>{saving ? "Saving progress..." : `${completedModules.length} of ${modules.length} modules completed`}</p>
                             </>
                         )}
                     </>

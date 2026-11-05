@@ -16,7 +16,19 @@ export default function AddCourse() {
             navigate("/admin-dashboard");
         } catch (saveError) {
             console.error("Failed to add course:", saveError);
-            setError("Unable to publish the course. Please try again.");
+            const response = saveError.response;
+            if (response?.status === 401) {
+                setError("Your admin session is invalid or expired. Sign out, sign in again, and retry publishing.");
+                return;
+            }
+
+            const validationErrors = Array.isArray(response?.data?.errors)
+                ? response.data.errors.join(", ")
+                : "";
+            const details = response?.data?.error || validationErrors || response?.data?.message;
+            setError(details
+                ? `Unable to publish the course: ${details}`
+                : "Unable to reach the server. Check your connection and try again.");
         }
     }
 

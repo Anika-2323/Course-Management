@@ -1,4 +1,4 @@
-import { Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation, Link } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
 import Home from "./pages/Home";
 import RoleSelect from "./pages/RoleSelect";
@@ -19,8 +19,9 @@ import Notifications from "./pages/Notifications";
 function AdminOnly({ children }) {
   const { loggedInAdmin } = useAuth();
   const location = useLocation();
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
-  return loggedInAdmin
+  return loggedInAdmin && token
     ? children
     : <Navigate to={`/admin-login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
 }
@@ -67,6 +68,20 @@ function App() {
       {/* Notifications */}
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/notifications.html" element={<Notifications />} />
+      <Route
+        path="*"
+        element={
+          <div style={{ textAlign: "center", padding: "80px 20px" }}>
+            <h1 style={{ fontSize: "3rem", marginBottom: "12px" }}>404</h1>
+            <p style={{ color: "#666", marginBottom: "24px" }}>
+              The page you are looking for does not exist.
+            </p>
+            <Link to="/" className="btn btn-primary" style={{ textDecoration: "none" }}>
+              Return Home
+            </Link>
+          </div>
+        }
+      />
     </Routes>
   );
 }

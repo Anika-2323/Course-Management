@@ -15,8 +15,11 @@ export function AuthProvider({ children }) {
     });
 
     const [loggedInAdmin, setLoggedInAdmin] = useState(() => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+        if (!token) return null;
+
         const data = localStorage.getItem("loggedInAdmin");
-        if (!data) return localStorage.getItem("isAdminVerified") === "true" ? { role: "admin" } : null;
+        if (!data) return null;
         try {
             return JSON.parse(data);
         } catch {
@@ -30,11 +33,17 @@ export function AuthProvider({ children }) {
         localStorage.setItem("loggedInStudent", JSON.stringify(student));
     }
 
-    function loginAdmin(admin) {
+    function loginAdmin(admin, token) {
+        if (!token) {
+            throw new Error("Admin login did not return an authentication token");
+        }
         logoutStudent();
         setLoggedInAdmin(admin);
         localStorage.setItem("loggedInAdmin", JSON.stringify(admin));
         localStorage.setItem("isAdminVerified", "true");
+        sessionStorage.setItem("role", "admin");
+        sessionStorage.setItem("user", JSON.stringify(admin));
+        if (token) sessionStorage.setItem("token", token);
     }
 
     function logoutStudent() {
@@ -43,6 +52,9 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("isStudentLoggedIn");
         localStorage.removeItem("studentName");
         localStorage.removeItem("studentAcademicId");
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("user_name");
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("studentUser");
     }
@@ -51,8 +63,12 @@ export function AuthProvider({ children }) {
         setLoggedInAdmin(null);
         localStorage.removeItem("loggedInAdmin");
         localStorage.removeItem("isAdminVerified");
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("user_name");
+        sessionStorage.removeItem("token");
     }
-
+    
     function logout(role) {
         if (role === "admin") {
             logoutAdmin();

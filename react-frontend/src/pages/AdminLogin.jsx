@@ -2,25 +2,40 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import PageCss from "../components/PageCss";
+import { loginStudent as authenticateUser } from "../services/authApi";
 
 export default function AdminLogin() {
     const { loginAdmin } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const email = formData.get("email");
-        const password = formData.get("password");
+        const email = String(formData.get("email") || "").trim();
+        const password = String(formData.get("password") || "");
 
-        if (email !== "admin@institute.edu" || password !== "password") {
-            setError("Access denied: invalid administrator credentials.");
-            return;
+        setError("");
+        setLoading(true);
+        try {
+            const result = await authenticateUser({ email, password });
+            if (result.student?.role !== "admin") {
+                setError("Access denied: this account is not an administrator.");
+                return;
+            }
+            if (!result.token) {
+                setError("Sign in failed because the server did not provide an authentication token.");
+                return;
+            }
+
+            loginAdmin(result.student, result.token);
+            navigate("/admin-dashboard", { replace: true });
+        } catch (loginError) {
+            setError(loginError.response?.data?.message || "Unable to sign in. Check your credentials and try again.");
+        } finally {
+            setLoading(false);
         }
-
-        loginAdmin({ email, role: "admin" });
-        navigate("/admin-dashboard", { replace: true });
     }
 
     return (
@@ -83,7 +98,7 @@ export default function AdminLogin() {
                                 <label htmlFor="admin-email">
                                     Admin email
                                 </label>
-                                <input id="admin-email" name="email" type="email" placeholder="admin@institute.edu" required />
+                                <input id="admin-email" name="email" type="email" placeholder="instructor@example.com" required />
                             </div>
                             <div className="field">
                                 <label htmlFor="admin-password">
@@ -96,8 +111,8 @@ export default function AdminLogin() {
                                     Forgot password?
                                 </a>
                             </div>
-                            <button className="btn btn-burgundy btn-block" type="submit">
-                                Login securely
+                            <button className="btn btn-burgundy btn-block" type="submit" disabled={loading}>
+                                {loading ? "Authenticating..." : "Login securely"}
                             </button>
                         </form>
                         <p className="form-foot">

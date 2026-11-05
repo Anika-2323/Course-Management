@@ -10,12 +10,14 @@ export default function EditCourse() {
     const { courses, loading, updateCourse, deleteCourse } = useCourses();
     const navigate = useNavigate();
     const [error, setError] = useState("");
-    const course = courses.find((item) => String(item.id) === courseId);
+    const course = courses.find((item) => String(item._id || item.id) === courseId);
+    const id = course?._id || course?.id;
+    const courseName = course?.courseName || course?.title || "this course";
 
     async function handleSubmit(updatedCourse) {
         try {
             setError("");
-            await updateCourse(course.id, updatedCourse);
+            await updateCourse(id, updatedCourse);
             navigate("/admin-dashboard");
         } catch (saveError) {
             console.error("Failed to update course:", saveError);
@@ -24,9 +26,9 @@ export default function EditCourse() {
     }
 
     async function handleDelete() {
-        if (!window.confirm(`Delete ${course.courseName}? This cannot be undone.`)) return;
+        if (!window.confirm(`Delete ${courseName}? This cannot be undone.`)) return;
         try {
-            await deleteCourse(course.id);
+            await deleteCourse(id);
             navigate("/admin-dashboard");
         } catch (deleteError) {
             console.error("Failed to delete course:", deleteError);
@@ -77,7 +79,7 @@ export default function EditCourse() {
                             Update the title, description, duration, or category for this course.
                         </p>
                     </div>
-                    <CourseForm course={course} submitLabel="Save Changes" onSubmit={handleSubmit} onDelete={handleDelete} error={error} />
+                    <CourseForm key={id} course={course} submitLabel="Save Changes" onSubmit={handleSubmit} onDelete={handleDelete} error={error} />
                 </div>
             </main>
             <footer className="site-footer">

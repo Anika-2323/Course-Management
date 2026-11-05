@@ -6,7 +6,17 @@ import CourseCard from "../components/CourseCard";
 
 export default function Courses() {
   const { courses, loading, error } = useCourses();
-  const { loggedInStudent } = useAuth();
+  const { loggedInAdmin, loggedInStudent } = useAuth();
+  const dashboardPath = loggedInAdmin
+    ? "/admin-dashboard"
+    : loggedInStudent
+      ? "/student-dashboard"
+      : "/student-login";
+  const dashboardLabel = loggedInAdmin
+    ? "Admin Dashboard"
+    : loggedInStudent
+      ? "Student Dashboard"
+      : "Portal Login";
 
   return (
     <>
@@ -31,8 +41,8 @@ export default function Courses() {
             <Link to="/" className="nav-item">Home</Link>
             <Link to="/courses" className="nav-item" style={{ opacity: 1, fontWeight: 600 }}>Courses</Link>
             <div id="nav-actions-wrapper" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Link to={loggedInStudent ? "/student-dashboard" : "/student-login"} className="btn btn-ghost">
-                {loggedInStudent ? "Student Dashboard" : "Portal Login"}
+              <Link to={dashboardPath} className="btn btn-ghost">
+                {dashboardLabel}
               </Link>
             </div>
           </nav>
@@ -57,7 +67,7 @@ export default function Courses() {
         {!loading && !error && (
           <div className="course-grid">
             {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard key={course._id || course.id} course={course} />
             ))}
           </div>
         )}

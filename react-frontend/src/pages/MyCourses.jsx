@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useCourses } from "../context/CourseContext";
-import { getEnrollmentProgress } from "../utils/enrollment";
+import { getEnrollmentCourse, getEnrollmentProgress } from "../utils/enrollment";
 import PageCss from "../components/PageCss";
 
 export default function MyCourses() {
     const { loggedInStudent } = useAuth();
     const { courses, enrollments } = useCourses();
-    const studentId = loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
+    const studentId = loggedInStudent?._id || loggedInStudent?.academicId || loggedInStudent?.studentId || loggedInStudent?.id;
     const myEnrollments = enrollments.filter((enrollment) => String(enrollment.studentId) === String(studentId));
 
     return (
@@ -52,20 +52,26 @@ export default function MyCourses() {
                                 <Link to="/courses" className="btn btn-primary">Browse Courses</Link>
                             </div>
                         ) : myEnrollments.map((enrollment) => {
-                            const course = courses.find((item) => String(item.id) === String(enrollment.courseId));
+                            const course = getEnrollmentCourse(enrollment, courses);
+                            const courseName = course?.courseName || course?.title || "Course details unavailable";
+                            const courseId = course?._id || course?.id || enrollment.courseId;
                             const progress = getEnrollmentProgress(enrollment, course);
                             return (
                                 <article className="course-card" key={enrollment.id}>
                                     <div className="course-meta">{course?.courseCode || enrollment.courseId} | {course?.category || "Course"}</div>
-                                    <h3>{course?.courseName || "Course details unavailable"}</h3>
-                                    <p className="course-desc">{course?.overview || "Your enrollment is active."}</p>
-                                    <div className="progress-track" role="progressbar" aria-label={`${course?.courseName || "Course"} progress`} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">
+                                    <h3>{courseName}</h3>
+                                    <p className="course-desc">{course?.overview || course?.description || "Your enrollment is active."}</p>
+                                    <div className="progress-track" role="progressbar" aria-label={`${courseName} progress`} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">
                                         <div className="progress-fill" style={{width: `${progress}%`}} />
                                     </div>
                                     <p>{progress}% complete</p>
-                                    <Link to={`/course-content?id=${encodeURIComponent(enrollment.courseId)}`} className="btn btn-primary">
-                                        {progress > 0 ? "Continue Course" : "Start Course"}
-                                    </Link>
+                                    {progress === 100 ? (
+                                        <Link to={`/certificate?courseId=${encodeURIComponent(courseId)}`} className="btn btn-primary">View Certificate</Link>
+                                    ) : (
+                                        <Link to={`/course-content?id=${encodeURIComponent(courseId)}`} className="btn btn-primary">
+                                            {progress > 0 ? "Continue Course" : "Start Course"}
+                                        </Link>
+                                    )}
                                 </article>
                             );
                         })}

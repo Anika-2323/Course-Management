@@ -1,82 +1,134 @@
-const courses = require("../data/courses");
+const Course = require("../models/Course");
 
-const normalizeCourse = (course = {}) => ({
-  id: String(course.id ?? ""),
-  courseCode: course.courseCode || "",
-  courseName: course.courseName || "",
-  category: course.category || "General",
-  level: course.level || "Beginner",
-  duration: course.duration || "8 Weeks",
-  overview: course.overview || "",
-  modules: Array.isArray(course.modules) ? course.modules : [],
-  instructor: course.instructor || "TBA",
-  status: course.status || "Active"
-});
+const normalizeCoursePayload = (payload = {}) => {
+  const normalized = { ...payload };
 
-const getCourses = (req, res) => {
-  res.status(200).json(courses);
-};
-
-const getCourseById = (req, res) => {
-  const { id } = req.params;
-  const course = courses.find((item) => String(item.id) === String(id));
-
-  if (!course) {
-    return res.status(404).json({ message: "Course not found" });
+  if (typeof normalized.instructor === "string") {
+    normalized.instructorName = normalized.instructor.trim();
+  }
+  if (normalized.courseName !== undefined) {
+    normalized.title = normalized.courseName;
+  }
+  if (normalized.overview !== undefined) {
+    normalized.description = normalized.overview;
   }
 
-  return res.status(200).json(course);
+  delete normalized.id;
+  delete normalized._id;
+  delete normalized.__v;
+  delete normalized.createdAt;
+  delete normalized.updatedAt;
+  delete normalized.courseName;
+  delete normalized.overview;
+  delete normalized.instructor;
+
+  return normalized;
 };
 
-const createCourse = (req, res) => {
-  const payload = req.body || {};
+// @desc    Get all courses from MongoDB Atlas
+// @route   GET /api/courses
+// @access  Public
+const getCourses = async (req, res) => {
+  try {
+    const courses = await Course.find()
+      .populate({ path: 'instructor', select: 'name email', strictPopulate: false })
+      .sort({ createdAt: -1 });
 
-  if (!payload.courseName || !payload.courseCode) {
-    return res.status(400).json({ message: "courseName and courseCode are required" });
+    return res.status(200).json(courses);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to fetch courses",
+      error: error.message,
+    });
   }
-
-  const nextId = String(
-    courses.length ? Number(courses[courses.length - 1].id) + 1 : 1
-  );
-
-  const newCourse = normalizeCourse({
-    ...payload,
-    id: payload.id || nextId,
-    status: payload.status || "Active"
-  });
-
-  courses.push(newCourse);
-  return res.status(201).json(newCourse);
 };
 
-const updateCourse = (req, res) => {
-  const { id } = req.params;
-  const index = courses.findIndex((course) => String(course.id) === String(id));
+// @desc    Get single course by ID
+// @route   GET /api/courses/:id
+// @access  Public
+const getCourseById = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate({ path: 'instructor', select: 'name email', strictPopulate: false });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Course not found" });
+    return res.status(200).json(course);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to fetch course",
+      error: error.message,
+    });
   }
-
-  const updatedCourse = normalizeCourse({
-    ...courses[index],
-    ...req.body,
-    id: id
-  });
-
-  courses[index] = updatedCourse;
-  return res.status(200).json(updatedCourse);
 };
 
-const deleteCourse = (req, res) => {
-  const { id } = req.params;
-  const index = courses.findIndex((course) => String(course.id) === String(id));
+// @desc    Create new course
+// @route   POST /api/courses
+// @access  Private
+const createCourse = async (req, res) => {
+  try {
+    const instructorId = req.user?._id || req.user?.sub || req.user?.id;
+    if (!instructorId) {
+      return res.status(401).json({ message: "Authenticated user ID is missing" });
+    }
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Course not found" });
+    const newCourse = await Course.create({
+      ...normalizeCoursePayload(req.body),
+      instructor: instructorId,
+    });
+
+    return res.status(201).json(newCourse);
+  } catch (error) {
+    return res.status(400).json({
+      message: "Failed to create course",
+      error: error.message,
+    });
   }
+};
 
-  const [deletedCourse] = courses.splice(index, 1);
-  return res.status(200).json(deletedCourse);
+// @desc    Update course
+// @route   PUT /api/courses/:id
+// @access  Private
+const updateCourse = async (req, res) => {
+  try {
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      { $set: normalizeCoursePayload(req.body) },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    return res.status(200).json(updatedCourse);
+  } catch (error) {
+    return res.status(400).json({
+      message: "Failed to update course",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Delete course
+// @route   DELETE /api/courses/:id
+// @access  Private
+const deleteCourse = async (req, res) => {
+  try {
+    const deletedCourse = await Course.findByIdAndDelete(req.params.id);
+
+    if (!deletedCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    return res.status(200).json({ message: "Course deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to delete course",
+      error: error.message,
+    });
+  }
 };
 
 module.exports = {
@@ -84,5 +136,5 @@ module.exports = {
   getCourseById,
   createCourse,
   updateCourse,
-  deleteCourse
+  deleteCourse,
 };

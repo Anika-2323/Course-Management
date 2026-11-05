@@ -1,29 +1,25 @@
 const jwt = require("jsonwebtoken");
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
     return res.status(401).json({
-      message: "Authentication token is required",
+      message: "Authentication required"
     });
   }
 
-  const token = authHeader.split(" ")[1];
-
+  const token = header.slice(7);
   try {
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        message: "JWT configuration is missing",
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET,
+      { algorithms: ["HS256"] }
+    );
     req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({
-      message: "Invalid or expired token",
+      message: "Invalid or expired token"
     });
   }
 }

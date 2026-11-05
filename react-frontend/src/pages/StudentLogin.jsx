@@ -33,12 +33,14 @@ export default function StudentLogin() {
     try {
       const result = await authenticateStudent(formData);
 
-      // Store token in sessionStorage as required by Task 10
+      // Store token and role in sessionStorage as required by Task 10
       if (result.token) {
         sessionStorage.setItem("token", result.token);
       }
       if (result.student) {
+        sessionStorage.setItem("role", result.student.role || "student");
         sessionStorage.setItem("studentUser", JSON.stringify(result.student));
+        sessionStorage.setItem("user", JSON.stringify(result.student));
         loginStudent(result.student);
       }
 

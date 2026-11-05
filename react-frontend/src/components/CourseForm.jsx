@@ -1,17 +1,24 @@
 import { useState } from "react";
+import { getCourseModules } from "../utils/enrollment";
 
-export default function CourseForm({ course = {}, submitLabel, onSubmit, onDelete, error }) {
-  const [values, setValues] = useState(() => ({
+const EMPTY_COURSE = {};
+
+function getCourseFormValues(course) {
+  return {
     courseCode: course.courseCode || "",
     category: course.category || "",
-    courseName: course.courseName || "",
-    instructor: course.instructor || "",
+    courseName: course.courseName || course.title || "",
+    instructor: course.instructorName || (typeof course.instructor === "object" ? course.instructor?.name || "" : course.instructor || ""),
     duration: course.duration || "",
     level: course.level || "",
-    overview: course.overview || "",
+    overview: course.overview || course.description || "",
     image: course.image || "",
-    modules: Array.isArray(course.modules) ? course.modules.join(", ") : ""
-  }));
+    modules: getCourseModules(course).join(", ")
+  };
+}
+
+export default function CourseForm({ course = EMPTY_COURSE, submitLabel, onSubmit, onDelete, error }) {
+  const [values, setValues] = useState(() => getCourseFormValues(course));
 
   function handleChange(event) {
     setValues((current) => ({ ...current, [event.target.name]: event.target.value }));
